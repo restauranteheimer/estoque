@@ -531,7 +531,11 @@
     auth.onAuthStateChanged(async (user)=>{ if(user){ currentUser=user; document.getElementById('authSection').style.display='none'; document.getElementById('userInfo').style.display='flex'; document.getElementById('userEmail').textContent=user.email; await loadUserData(user.uid); } else { currentUser=null; items=[]; document.getElementById('authSection').style.display='flex'; document.getElementById('userInfo').style.display='none'; document.getElementById('syncStatus').textContent='🔐 Faça login para salvar'; document.getElementById('syncStatus').classList.remove('synced'); refreshAllUI(); } });
 
     window.login=login; window.signup=signup; window.logout=logout; window.openNewTransaction=openNewTransaction; window.editTransaction=editTransaction; window.closeModal=closeModal; window.deleteItem=deleteItem; window.openFullReport=openFullReport; window.generateWeeklyReport=generateWeeklyReport; window.generateMonthlyReport=generateMonthlyReport; window.generateComparisonReport=generateComparisonReport; window.closeReportModal=closeReportModal; window.prevMonth=prevMonth; window.nextMonth=nextMonth; window.selectDate=selectDate; window.sendTransactionViaWhatsApp=sendTransactionViaWhatsApp; window.sendWeeklyReportToWhatsApp=sendWeeklyReportToWhatsApp; window.closeDayModal=closeDayModal; window.openDayModal=openDayModal; window.deleteItemFromDay=deleteItemFromDay; window.editTransactionFromDay=editTransactionFromDay; window.setDescriptionSuggestion=setDescriptionSuggestion; window.exportToCSV=exportToCSV; window.openNewTransactionFromDay=openNewTransactionFromDay;
-    selectedDate=new Date(); refreshAllUI(); document.getElementById('selectedDateTitle').innerHTML=formatDateDisplay(selectedDate);
+
+    // Inicialização
+    selectedDate = new Date();
+    refreshAllUI();
+    document.getElementById('selectedDateTitle').innerHTML = formatDateDisplay(selectedDate);
 </script>
 </body>
 </html>
