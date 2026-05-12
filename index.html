@@ -461,7 +461,6 @@
             cursor: pointer;
             font-size: 0.75rem;
         }
-        /* Modo escuro */
         body.dark-mode {
             --primary: #a78bfa;
             --primary-dark: #8b5cf6;
@@ -478,7 +477,7 @@
         body.dark-mode .month-day { background: #374151; color: #f9fafb; }
         body.dark-mode .month-day.today { background: #4c1d95; color: white; }
         body.dark-mode .day-chip { background: #1f2937; color: #f9fafb; }
-        body.dark-mode .transaction-item, body.dark-mode .day-modal-item { border-bottom-color: #374151; }
+        body.dark-mode .day-modal-item { border-bottom-color: #374151; }
         body.dark-mode .modal-content, body.dark-mode .report-modal-content { background: #1f2937; color: #f9fafb; }
         body.dark-mode .close-modal, body.dark-mode .close-report-modal { background: #374151; color: white; }
         body.dark-mode .form-group input, body.dark-mode .form-group select, body.dark-mode .form-group textarea { background: #374151; border-color: #4b5563; color: white; }
@@ -524,9 +523,7 @@
             cursor: pointer;
             padding: 0 6px;
         }
-        .insight-modal-content {
-            line-height: 1.5;
-        }
+        .insight-modal-content { line-height: 1.5; }
         .insight-item {
             margin-bottom: 12px;
             padding: 10px;
@@ -653,7 +650,7 @@
     </div>
 </div>
 
-<!-- Modal de Insights (lâmpada) -->
+<!-- Modal de Insights -->
 <div id="insightsModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -698,7 +695,6 @@
     // ========== VARIÁVEIS GLOBAIS ==========
     let currentUser = null;
     let items = [];
-    let selectedDateForModal = null;
     let currentMonth = new Date();
     let editingItemId = null;
     let userSettings = { meta: 0 };
@@ -706,12 +702,30 @@
     // ========== FUNÇÕES AUXILIARES ==========
     function showLoading() { document.getElementById('loadingOverlay').style.display = 'flex'; }
     function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
-    function formatDateKey(date) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
-    function formatDateDisplay(date) { return date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }); }
-    function getWeekRange() { const today=new Date(), start=new Date(today); start.setDate(today.getDate()-today.getDay()); const end=new Date(start); end.setDate(start.getDate()+6); return `${start.getDate()}/${start.getMonth()+1} a ${end.getDate()}/${end.getMonth()+1}`; }
+    function formatDateKey(date) { 
+        if (!date) return '';
+        const d = new Date(date);
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; 
+    }
+    function formatDateDisplay(date) { 
+        if (!date) return '';
+        const d = new Date(date);
+        return d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }); 
+    }
+    function getWeekRange() { 
+        const today=new Date(), start=new Date(today); 
+        start.setDate(today.getDate()-today.getDay()); 
+        const end=new Date(start); 
+        end.setDate(start.getDate()+6); 
+        return `${start.getDate()}/${start.getMonth()+1} a ${end.getDate()}/${end.getMonth()+1}`; 
+    }
 
     // ========== FIREBASE ==========
-    async function saveToCloud() { if(!currentUser) return; await db.ref(`users/${currentUser.uid}/items`).set(items); await db.ref(`users/${currentUser.uid}/settings`).set(userSettings); }
+    async function saveToCloud() { 
+        if(!currentUser) return; 
+        await db.ref(`users/${currentUser.uid}/items`).set(items); 
+        await db.ref(`users/${currentUser.uid}/settings`).set(userSettings); 
+    }
     async function loadUserData(uid) { 
         showLoading(); 
         const snapItems = await db.ref(`users/${uid}/items`).once('value'); 
@@ -728,7 +742,7 @@
         refreshAllUI(); hideLoading(); 
     }
 
-    // ========== AUTOCOMPLETE DESCRIÇÃO + SUGESTÃO DE VALOR ==========
+    // ========== AUTOCOMPLETE + SUGESTÃO DE VALOR ==========
     function getDescriptionSuggestions() {
         const transactions = items.filter(i => i.type === 'income' || i.type === 'expense');
         const freq = new Map();
@@ -747,18 +761,22 @@
         if(matches.length === 0) return;
         const freq = new Map();
         matches.forEach(m => freq.set(m.amount, (freq.get(m.amount)||0)+1));
-        let mostFrequentAmount = null, maxCount = 0;
+        let mostFrequent = null, maxCount = 0;
         for(let [amt, count] of freq.entries()) {
-            if(count > maxCount) { maxCount = count; mostFrequentAmount = amt; }
+            if(count > maxCount) { maxCount = count; mostFrequent = amt; }
         }
-        if(mostFrequentAmount !== null) document.getElementById('amount').value = mostFrequentAmount;
+        if(mostFrequent !== null) document.getElementById('amount').value = mostFrequent;
     }
 
     // ========== META ==========
     function updateMetaUI() {
         const meta = userSettings.meta || 0;
         document.getElementById('metaValueDisplay').innerHTML = `R$ ${meta.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-        if(meta === 0) { document.getElementById('progressBar').style.width = '0%'; document.getElementById('metaStatus').innerHTML = 'Defina uma meta para começar'; return; }
+        if(meta === 0) { 
+            document.getElementById('progressBar').style.width = '0%'; 
+            document.getElementById('metaStatus').innerHTML = 'Defina uma meta para começar'; 
+            return; 
+        }
         const monthExpense = getMonthStats().expense;
         const percent = Math.min(100, (monthExpense / meta) * 100);
         document.getElementById('progressBar').style.width = `${percent}%`;
@@ -778,15 +796,57 @@
     }
 
     // ========== DADOS ==========
-    function getItemsForDate(date) { return items.filter(i => i.date === formatDateKey(date)); }
-    function getFinancialItemsForDate(date) { return items.filter(i => i.date === formatDateKey(date) && (i.type === 'income' || i.type === 'expense')); }
-    function getAppointmentsForDate(date) { return items.filter(i => i.date === formatDateKey(date) && i.type === 'appointment'); }
-    function getNotesForDate(date) { return items.filter(i => i.date === formatDateKey(date) && i.type === 'note'); }
-    function getDaySummary(date) { let income=0, expense=0; getFinancialItemsForDate(date).forEach(i=>{ if(i.type==='income') income+=i.amount; if(i.type==='expense') expense+=i.amount; }); return { income, expense, balance: income-expense }; }
-    function getWeekBalance(date) { let income=0, expense=0, start=new Date(date); start.setDate(date.getDate()-date.getDay()); for(let i=0;i<7;i++){ let d=new Date(start); d.setDate(start.getDate()+i); getFinancialItemsForDate(d).forEach(i=>{ if(i.type==='income') income+=i.amount; if(i.type==='expense') expense+=i.amount; }); } return { balance: income-expense, income, expense }; }
-    function getMonthStats() { let income=0, expense=0, today=new Date(); for(let d=1;d<=31;d++){ let date=new Date(today.getFullYear(),today.getMonth(),d); if(date.getMonth()!==today.getMonth()) break; getFinancialItemsForDate(date).forEach(i=>{ if(i.type==='income') income+=i.amount; if(i.type==='expense') expense+=i.amount; }); } return { income, expense, balance: income-expense }; }
+    function getItemsForDate(date) { 
+        const key = formatDateKey(date);
+        return items.filter(i => i.date === key); 
+    }
+    function getFinancialItemsForDate(date) { 
+        const key = formatDateKey(date);
+        return items.filter(i => i.date === key && (i.type === 'income' || i.type === 'expense')); 
+    }
+    function getAppointmentsForDate(date) { 
+        const key = formatDateKey(date);
+        return items.filter(i => i.date === key && i.type === 'appointment'); 
+    }
+    function getNotesForDate(date) { 
+        const key = formatDateKey(date);
+        return items.filter(i => i.date === key && i.type === 'note'); 
+    }
+    function getDaySummary(date) { 
+        let income=0, expense=0; 
+        getFinancialItemsForDate(date).forEach(i=>{ 
+            if(i.type==='income') income+=i.amount; 
+            if(i.type==='expense') expense+=i.amount; 
+        }); 
+        return { income, expense, balance: income-expense }; 
+    }
+    function getWeekBalance(date) { 
+        let income=0, expense=0, start=new Date(date); 
+        start.setDate(date.getDate()-date.getDay()); 
+        for(let i=0;i<7;i++){ 
+            let d=new Date(start); 
+            d.setDate(start.getDate()+i); 
+            getFinancialItemsForDate(d).forEach(i=>{ 
+                if(i.type==='income') income+=i.amount; 
+                if(i.type==='expense') expense+=i.amount; 
+            }); 
+        } 
+        return { balance: income-expense, income, expense }; 
+    }
+    function getMonthStats() { 
+        let income=0, expense=0, today=new Date(); 
+        for(let d=1;d<=31;d++){ 
+            let date=new Date(today.getFullYear(),today.getMonth(),d); 
+            if(date.getMonth()!==today.getMonth()) break; 
+            getFinancialItemsForDate(date).forEach(i=>{ 
+                if(i.type==='income') income+=i.amount; 
+                if(i.type==='expense') expense+=i.amount; 
+            }); 
+        } 
+        return { income, expense, balance: income-expense }; 
+    }
 
-    // ========== INSIGHTS (gerar conteúdo para modal) ==========
+    // ========== INSIGHTS ==========
     function generateInsightsHTML() {
         const monthStats = getMonthStats();
         const weekStats = getWeekBalance(new Date());
@@ -811,9 +871,21 @@
 
     // ========== RENDERIZAÇÃO ==========
     function renderWeekCalendar() {
-        const today=new Date(), start=new Date(today); start.setDate(today.getDate()-today.getDay());
-        const weekDays=['DOM','SEG','TER','QUA','QUI','SEX','SÁB'], container=document.getElementById('weekDaysContainer'); container.innerHTML='';
-        for(let i=0;i<7;i++){ let d=new Date(start); d.setDate(start.getDate()+i); let summary=getDaySummary(d); let isToday=d.toDateString()===today.toDateString(); let chip=document.createElement('div'); chip.className=`day-chip ${isToday?'today':''}`; chip.onclick=()=>showDayModal(d); chip.innerHTML=`<div class="day-name">${weekDays[i]}</div><div class="day-number">${d.getDate()}</div><div class="day-amount ${summary.balance>=0?'amount-positive':'amount-negative'}">${summary.balance>=0?'+':'-'}R$ ${Math.abs(summary.balance).toFixed(2)}</div>`; container.appendChild(chip); }
+        const today=new Date(), start=new Date(today); 
+        start.setDate(today.getDate()-today.getDay());
+        const weekDays=['DOM','SEG','TER','QUA','QUI','SEX','SÁB'], container=document.getElementById('weekDaysContainer'); 
+        container.innerHTML='';
+        for(let i=0;i<7;i++){ 
+            let d=new Date(start); 
+            d.setDate(start.getDate()+i); 
+            let summary=getDaySummary(d); 
+            let isToday=d.toDateString()===today.toDateString(); 
+            let chip=document.createElement('div'); 
+            chip.className=`day-chip ${isToday?'today':''}`; 
+            chip.onclick=()=>showDayModal(d); 
+            chip.innerHTML=`<div class="day-name">${weekDays[i]}</div><div class="day-number">${d.getDate()}</div><div class="day-amount ${summary.balance>=0?'amount-positive':'amount-negative'}">${summary.balance>=0?'+':'-'}R$ ${Math.abs(summary.balance).toFixed(2)}</div>`; 
+            container.appendChild(chip); 
+        }
         document.getElementById('currentMonthLabel').innerHTML=today.toLocaleDateString('pt-BR',{month:'short',year:'numeric'});
     }
     function renderMonthCalendar() {
@@ -822,15 +894,26 @@
         const grid=document.getElementById('monthGrid'); grid.innerHTML='';
         weekDays.forEach(day=>{ let h=document.createElement('div'); h.className='weekday-header'; h.textContent=day; grid.appendChild(h); });
         for(let i=0;i<startDay;i++){ let e=document.createElement('div'); e.className='month-day'; e.style.background='transparent'; e.style.cursor='default'; e.style.minHeight='55px'; grid.appendChild(e); }
-        for(let day=1;day<=totalDays;day++){ let d=new Date(year,month,day), dayItems=getItemsForDate(d); let income=0, expense=0, allPaid=true; 
-            dayItems.forEach(i=>{ if(i.type==='income') income+=i.amount; if(i.type==='expense') expense+=i.amount; if(i.status !== 'paid') allPaid=false; }); 
-            let isToday=d.toDateString()===today.toDateString(); let indicatorClass=''; 
-            if(income>0&&expense>0) indicatorClass='has-both'; else if(income>0) indicatorClass='has-income'; else if(expense>0) indicatorClass='has-expense';
+        for(let day=1;day<=totalDays;day++){ 
+            let d=new Date(year,month,day), dayItems=getItemsForDate(d); 
+            let income=0, expense=0, allPaid=true; 
+            dayItems.forEach(i=>{ 
+                if(i.type==='income') income+=i.amount; 
+                if(i.type==='expense') expense+=i.amount; 
+                if(i.status !== 'paid') allPaid=false; 
+            }); 
+            let isToday=d.toDateString()===today.toDateString(); 
+            let indicatorClass=''; 
+            if(income>0&&expense>0) indicatorClass='has-both'; 
+            else if(income>0) indicatorClass='has-income'; 
+            else if(expense>0) indicatorClass='has-expense';
             const hasAppointment = dayItems.some(i => i.type === 'appointment');
             const hasNote = dayItems.some(i => i.type === 'note');
             if (hasAppointment) indicatorClass += ' has-appointment';
             if (hasNote) indicatorClass += ' has-note';
-            let dayDiv=document.createElement('div'); dayDiv.className=`month-day ${isToday?'today':''} ${indicatorClass}`; let indicators=''; 
+            let dayDiv=document.createElement('div'); 
+            dayDiv.className=`month-day ${isToday?'today':''} ${indicatorClass}`; 
+            let indicators=''; 
             if(income>0) indicators+=`<span class="indicator-up ${allPaid?'paid':''}">↑${income.toFixed(0)}</span>`; 
             if(expense>0) indicators+=`<span class="indicator-down ${allPaid?'paid':''}">↓${expense.toFixed(0)}</span>`;
             if (hasAppointment) indicators += `<span class="indicator-appointment">📅</span>`;
@@ -843,7 +926,6 @@
 
     // ========== MODAL DO DIA ==========
     function showDayModal(date) {
-        selectedDateForModal = date;
         document.getElementById('dayModalTitle').innerHTML = formatDateDisplay(date);
         const container = document.getElementById('dayModalContent');
         container.innerHTML = '';
@@ -865,14 +947,14 @@
                 div.innerHTML = `
                     <div class="day-modal-icon">${icon}</div>
                     <div class="day-modal-info">
-                        <div class="day-modal-title">${item.title}</div>
+                        <div class="day-modal-title">${escapeHtml(item.title)}</div>
                         <div class="day-modal-detail">${item.status === 'paid' ? '✅ Pago' : '⏳ Pendente'}</div>
                     </div>
                     <div class="day-modal-amount ${amountClass}">${signal} R$ ${item.amount.toFixed(2)}</div>
                     <div class="day-modal-actions">
-                        <button onclick="editTransaction(${globalIndex}); closeDayModal();">✏️</button>
-                        <button onclick="deleteItem(${globalIndex}); closeDayModal();">🗑️</button>
-                        <button onclick="repeatTransaction(${globalIndex}); closeDayModal();">↻</button>
+                        <button onclick="editTransaction(${globalIndex})">✏️</button>
+                        <button onclick="deleteItem(${globalIndex})">🗑️</button>
+                        <button onclick="repeatTransaction(${globalIndex})">↻</button>
                     </div>
                 `;
                 finDiv.appendChild(div);
@@ -894,11 +976,11 @@
                 div.innerHTML = `
                     <div class="day-modal-icon">📅</div>
                     <div class="day-modal-info">
-                        <div class="day-modal-title">${app.title}</div>
+                        <div class="day-modal-title">${escapeHtml(app.title)}</div>
                         <div class="day-modal-detail">${app.time ? `🕒 ${app.time}` : ''} ${app.location ? `📍 ${app.location}` : ''}</div>
                     </div>
                     <div class="day-modal-actions">
-                        <button onclick="deleteItem(${index}); closeDayModal();">🗑️</button>
+                        <button onclick="deleteItem(${index})">🗑️</button>
                     </div>
                 `;
                 appDiv.appendChild(div);
@@ -920,11 +1002,11 @@
                 div.innerHTML = `
                     <div class="day-modal-icon">📝</div>
                     <div class="day-modal-info">
-                        <div class="day-modal-title">${note.title}</div>
-                        <div class="day-modal-detail">${note.content ? note.content.substring(0,100) : ''}</div>
+                        <div class="day-modal-title">${escapeHtml(note.title)}</div>
+                        <div class="day-modal-detail">${note.content ? escapeHtml(note.content.substring(0,100)) : ''}</div>
                     </div>
                     <div class="day-modal-actions">
-                        <button onclick="deleteItem(${index}); closeDayModal();">🗑️</button>
+                        <button onclick="deleteItem(${index})">🗑️</button>
                     </div>
                 `;
                 notesDiv.appendChild(div);
@@ -934,57 +1016,94 @@
         
         document.getElementById('dayModal').style.display = 'flex';
     }
-    function closeDayModal() { document.getElementById('dayModal').style.display = 'none'; selectedDateForModal = null; }
-    function openNewTransactionFromModal() { if(selectedDateForModal) { openNewTransaction(selectedDateForModal); closeDayModal(); } }
+    function closeDayModal() { document.getElementById('dayModal').style.display = 'none'; }
+    function openNewTransactionFromModal() { 
+        // pegar a data que está no título do modal (dia clicado)
+        const dateStr = document.getElementById('dayModalTitle').innerHTML;
+        // tentar extrair a data do texto; fallback: data atual
+        let date = new Date();
+        const match = dateStr.match(/\d{1,2} de \w+ de \d{4}/);
+        if(match) {
+            const partes = match[0].split(' de ');
+            const meses = { 'janeiro':0,'fevereiro':1,'março':2,'abril':3,'maio':4,'junho':5,'julho':6,'agosto':7,'setembro':8,'outubro':9,'novembro':10,'dezembro':11 };
+            const mes = meses[partes[1].toLowerCase()];
+            if(mes !== undefined) date = new Date(parseInt(partes[2]), mes, parseInt(partes[0]));
+        }
+        openNewTransaction(date); 
+        closeDayModal(); 
+    }
     
     function repeatTransaction(index) {
         const original = items[index];
         if (!original) return;
-        const newDate = new Date();
-        document.getElementById('modalTitle').innerHTML = 'Repetir transação';
-        document.getElementById('modalDateInfo').innerHTML = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(newDate)}"></div>`;
-        const dateInput = document.getElementById('transactionDate');
-        if (dateInput) dateInput.addEventListener('change', (e) => { const newDate2 = new Date(e.target.value); if (!isNaN(newDate2.getTime())) selectedDateForModal = newDate2; });
-        document.getElementById('modal').style.display = 'flex';
-        document.querySelector('[data-tab="financial"]').click();
+        editingItemId = null;
+        // Abrir modal com data atual
+        const today = new Date();
+        openModalWithDate(today, 'financial');
         document.getElementById('type').value = original.type;
         document.getElementById('description').value = original.title;
         document.getElementById('amount').value = original.amount;
         document.getElementById('status').value = original.status || 'pending';
-        editingItemId = null;
-        selectedDateForModal = newDate;
+        document.getElementById('modalTitle').innerHTML = 'Repetir transação';
     }
     
     function editTransaction(index) { 
-        const item = items[index]; if(!item) return;
+        const item = items[index]; 
+        if(!item) return;
         editingItemId = item.id;
         const editDate = new Date(item.date);
-        document.getElementById('modalTitle').innerHTML = 'Editar transação';
-        document.getElementById('modalDateInfo').innerHTML = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(editDate)}"></div>`;
-        const dateInput = document.getElementById('transactionDate');
-        if (dateInput) dateInput.addEventListener('change', (e) => { const newDate = new Date(e.target.value); if (!isNaN(newDate.getTime())) selectedDateForModal = newDate; });
-        document.getElementById('modal').style.display = 'flex';
-        document.querySelector('[data-tab="financial"]').click();
+        openModalWithDate(editDate, 'financial');
         document.getElementById('type').value = item.type;
         document.getElementById('description').value = item.title;
         document.getElementById('amount').value = item.amount;
         document.getElementById('status').value = item.status || 'pending';
-        selectedDateForModal = editDate;
+        document.getElementById('modalTitle').innerHTML = 'Editar transação';
+    }
+    
+    function openModalWithDate(date, tab = 'financial') {
+        const dateStr = formatDateKey(date);
+        document.getElementById('modalDateInfo').innerHTML = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${dateStr}"></div>`;
+        document.getElementById('modal').style.display = 'flex';
+        // ativar a aba correta
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        if (tab === 'financial') {
+            document.querySelector('.tab-btn[data-tab="financial"]').classList.add('active');
+            document.getElementById('financialTab').classList.add('active');
+        } else if (tab === 'appointment') {
+            document.querySelector('.tab-btn[data-tab="appointment"]').classList.add('active');
+            document.getElementById('appointmentTab').classList.add('active');
+        } else if (tab === 'note') {
+            document.querySelector('.tab-btn[data-tab="note"]').classList.add('active');
+            document.getElementById('noteTab').classList.add('active');
+        }
+        // reaplicar o listener de mudança de data
+        const dateInput = document.getElementById('transactionDate');
+        if (dateInput) {
+            dateInput.onchange = function(e) {
+                // apenas armazena, será usado no submit
+                console.log('Data alterada para:', e.target.value);
+            };
+        }
     }
     
     function openNewTransaction(date, presetType = null) { 
         editingItemId = null;
         const targetDate = date || new Date();
-        selectedDateForModal = targetDate;
-        document.getElementById('modalTitle').innerHTML = 'Nova transação';
-        document.getElementById('modalDateInfo').innerHTML = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(targetDate)}"></div>`;
-        const dateInput = document.getElementById('transactionDate');
-        if (dateInput) dateInput.addEventListener('change', (e) => { const newDate = new Date(e.target.value); if (!isNaN(newDate.getTime())) selectedDateForModal = newDate; });
-        document.getElementById('modal').style.display = 'flex';
+        openModalWithDate(targetDate, 'financial');
         document.getElementById('financialForm').reset();
         if (presetType) document.getElementById('type').value = presetType;
+        document.getElementById('modalTitle').innerHTML = 'Nova transação';
         const descInput = document.getElementById('description');
         descInput.oninput = function() { suggestAmountByDescription(this.value); };
+    }
+    
+    function getSelectedDateFromModal() {
+        const dateInput = document.getElementById('transactionDate');
+        if (dateInput && dateInput.value) {
+            return new Date(dateInput.value);
+        }
+        return new Date();
     }
     
     function updateBalances() { 
@@ -1002,7 +1121,21 @@
     function refreshAllUI() { renderWeekCalendar(); renderMonthCalendar(); updateBalances(); updateDescriptionDatalist(); }
     function saveData() { refreshAllUI(); if(currentUser) saveToCloud(); }
     function closeModal() { document.getElementById('modal').style.display='none'; editingItemId=null; refreshAllUI(); }
-    function deleteItem(index) { if(confirm('⚠️ Tem certeza que deseja EXCLUIR esta transação?')){ items.splice(index,1); saveData(); if(selectedDateForModal) showDayModal(selectedDateForModal); } }
+    function deleteItem(index) { 
+        if(confirm('⚠️ Tem certeza que deseja EXCLUIR esta transação?')){ 
+            items.splice(index,1); 
+            saveData(); 
+        } 
+    }
+    function escapeHtml(str) { 
+        if(!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
 
     // ========== RELATÓRIOS ==========
     function openFullReport() {
@@ -1041,39 +1174,127 @@
     }
     async function logout() { showLoading(); try{ await auth.signOut(); } catch(e){ alert(e.message); } finally{ hideLoading(); } }
 
-    // ========== EVENTOS ==========
-    auth.onAuthStateChanged(async (user)=>{ 
-        if(user){ currentUser=user; document.getElementById('authSection').style.display='none'; document.getElementById('userInfo').style.display='flex'; document.getElementById('userEmail').textContent=user.email; await loadUserData(user.uid); } 
-        else { currentUser=null; items=[]; userSettings={meta:0}; document.getElementById('authSection').style.display='flex'; document.getElementById('userInfo').style.display='none'; document.getElementById('syncStatus').textContent='🔐 Faça login para salvar'; document.getElementById('syncStatus').classList.remove('synced'); refreshAllUI(); } 
-    });
+    // ========== SUBMITS (corrigidos com data do campo) ==========
     document.getElementById('financialForm').addEventListener('submit',(e)=>{ 
         e.preventDefault(); 
-        const newTransaction = { id: editingItemId || Date.now(), type: document.getElementById('type').value, title: document.getElementById('description').value, amount: parseFloat(document.getElementById('amount').value), status: document.getElementById('status').value, date: formatDateKey(selectedDateForModal || new Date()) };
-        if(editingItemId){ const idx = items.findIndex(i=>i.id===editingItemId); if(idx!==-1) items[idx]=newTransaction; else items.push(newTransaction); } else items.push(newTransaction);
-        saveData(); closeModal(); 
+        const selectedDate = getSelectedDateFromModal();
+        const newTransaction = { 
+            id: editingItemId || Date.now(), 
+            type: document.getElementById('type').value, 
+            title: document.getElementById('description').value, 
+            amount: parseFloat(document.getElementById('amount').value), 
+            status: document.getElementById('status').value, 
+            date: formatDateKey(selectedDate)
+        };
+        if(editingItemId){ 
+            const idx = items.findIndex(i=>i.id===editingItemId); 
+            if(idx!==-1) items[idx]=newTransaction; 
+            else items.push(newTransaction); 
+        } else { 
+            items.push(newTransaction); 
+        }
+        saveData(); 
+        closeModal(); 
     });
-    document.getElementById('appointmentForm').addEventListener('submit',(e)=>{ e.preventDefault(); items.push({ id:Date.now(), type:'appointment', title:document.getElementById('appointmentTitle').value, time:document.getElementById('appointmentTime').value, location:document.getElementById('appointmentLocation').value, date:formatDateKey(selectedDateForModal || new Date()) }); saveData(); closeModal(); });
-    document.getElementById('noteForm').addEventListener('submit',(e)=>{ e.preventDefault(); items.push({ id:Date.now(), type:'note', title:document.getElementById('noteTitle').value, content:document.getElementById('noteContent').value, date:formatDateKey(selectedDateForModal || new Date()) }); saveData(); closeModal(); });
-    document.querySelectorAll('.tab-btn').forEach(btn=>{ btn.addEventListener('click',function(){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); document.getElementById(this.dataset.tab+'Tab').classList.add('active'); }); });
-    window.onclick=(e)=>{ if(e.target===document.getElementById('modal')) closeModal(); if(e.target===document.getElementById('reportModal')) closeReportModal(); if(e.target===document.getElementById('metaModal')) closeMetaModal(); if(e.target===document.getElementById('dayModal')) closeDayModal(); if(e.target===document.getElementById('insightsModal')) closeInsightsModal(); };
+    
+    document.getElementById('appointmentForm').addEventListener('submit',(e)=>{ 
+        e.preventDefault(); 
+        const selectedDate = getSelectedDateFromModal();
+        items.push({ 
+            id: Date.now(), 
+            type: 'appointment', 
+            title: document.getElementById('appointmentTitle').value, 
+            time: document.getElementById('appointmentTime').value, 
+            location: document.getElementById('appointmentLocation').value, 
+            date: formatDateKey(selectedDate)
+        }); 
+        saveData(); 
+        closeModal(); 
+    });
+    
+    document.getElementById('noteForm').addEventListener('submit',(e)=>{ 
+        e.preventDefault(); 
+        const selectedDate = getSelectedDateFromModal();
+        items.push({ 
+            id: Date.now(), 
+            type: 'note', 
+            title: document.getElementById('noteTitle').value, 
+            content: document.getElementById('noteContent').value, 
+            date: formatDateKey(selectedDate)
+        }); 
+        saveData(); 
+        closeModal(); 
+    });
+
+    // ========== EVENTOS DE UI ==========
+    document.querySelectorAll('.tab-btn').forEach(btn=>{ 
+        btn.addEventListener('click',function(){ 
+            document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); 
+            this.classList.add('active'); 
+            document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); 
+            document.getElementById(this.dataset.tab+'Tab').classList.add('active'); 
+        }); 
+    });
+    
+    window.onclick=(e)=>{ 
+        if(e.target===document.getElementById('modal')) closeModal(); 
+        if(e.target===document.getElementById('reportModal')) closeReportModal(); 
+        if(e.target===document.getElementById('metaModal')) closeMetaModal(); 
+        if(e.target===document.getElementById('dayModal')) closeDayModal(); 
+        if(e.target===document.getElementById('insightsModal')) closeInsightsModal(); 
+    };
 
     // Modo escuro
     const darkModeToggle = document.getElementById('darkModeToggle');
     if(darkModeToggle) {
-        if(localStorage.getItem('darkMode') === 'enabled') { document.body.classList.add('dark-mode'); darkModeToggle.textContent = '☀️ Modo claro'; } else { darkModeToggle.textContent = '🌙 Modo escuro'; }
-        darkModeToggle.addEventListener('click', () => { document.body.classList.toggle('dark-mode'); const isDark = document.body.classList.contains('dark-mode'); localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled'); darkModeToggle.textContent = isDark ? '☀️ Modo claro' : '🌙 Modo escuro'; });
+        if(localStorage.getItem('darkMode') === 'enabled') { 
+            document.body.classList.add('dark-mode'); 
+            darkModeToggle.textContent = '☀️ Modo claro'; 
+        } else { 
+            darkModeToggle.textContent = '🌙 Modo escuro'; 
+        }
+        darkModeToggle.addEventListener('click', () => { 
+            document.body.classList.toggle('dark-mode'); 
+            const isDark = document.body.classList.contains('dark-mode'); 
+            localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled'); 
+            darkModeToggle.textContent = isDark ? '☀️ Modo claro' : '🌙 Modo escuro'; 
+        });
     }
-    // Lâmpada de insights
+    
+    // Lâmpada insights
     const lamp = document.getElementById('insightsLamp');
     if(lamp) lamp.addEventListener('click', showInsightsModal);
+    
     // Login com Enter
     const loginEmail = document.getElementById('loginEmail'), loginPassword = document.getElementById('loginPassword'), loginBtn = document.getElementById('loginBtn');
     function handleLoginEnter(e) { if(e.key === 'Enter') login(); }
     if(loginEmail) loginEmail.addEventListener('keypress', handleLoginEnter);
     if(loginPassword) loginPassword.addEventListener('keypress', handleLoginEnter);
     if(loginBtn) loginBtn.onclick = login;
-    // Expor funções globais
-    window.login = login; window.signup = signup; window.logout = logout; window.openNewTransaction = openNewTransaction; window.editTransaction = editTransaction; window.closeModal = closeModal; window.deleteItem = deleteItem; window.openFullReport = openFullReport; window.generateWeeklyReport = generateWeeklyReport; window.generateMonthlyReport = generateMonthlyReport; window.closeReportModal = closeReportModal; window.prevMonth = prevMonth; window.nextMonth = nextMonth; window.showDayModal = showDayModal; window.closeDayModal = closeDayModal; window.repeatTransaction = repeatTransaction; window.openNewTransactionFromModal = openNewTransactionFromModal; window.editMeta = editMeta; window.saveMeta = saveMeta; window.closeMetaModal = closeMetaModal; window.closeInsightsModal = closeInsightsModal;
+    
+    // Expor funções globais para os botões inline
+    window.login = login;
+    window.signup = signup;
+    window.logout = logout;
+    window.openNewTransaction = openNewTransaction;
+    window.editTransaction = editTransaction;
+    window.closeModal = closeModal;
+    window.deleteItem = deleteItem;
+    window.openFullReport = openFullReport;
+    window.generateWeeklyReport = generateWeeklyReport;
+    window.generateMonthlyReport = generateMonthlyReport;
+    window.closeReportModal = closeReportModal;
+    window.prevMonth = prevMonth;
+    window.nextMonth = nextMonth;
+    window.showDayModal = showDayModal;
+    window.closeDayModal = closeDayModal;
+    window.repeatTransaction = repeatTransaction;
+    window.openNewTransactionFromModal = openNewTransactionFromModal;
+    window.editMeta = editMeta;
+    window.saveMeta = saveMeta;
+    window.closeMetaModal = closeMetaModal;
+    window.closeInsightsModal = closeInsightsModal;
+    
     // Inicialização
     refreshAllUI();
 </script>
