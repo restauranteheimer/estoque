@@ -3,18 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <title>Dinheiro em Dia • Banco Digital</title>
+    <title>Dinheiro em Dia • 2</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         :root {
             --primary: #8b5cf6;
             --primary-dark: #6d28d9;
@@ -48,18 +43,11 @@
             padding: 0 0 80px 0;
         }
         @media (min-width: 900px) {
-            .dashboard-grid {
-                display: grid;
-                grid-template-columns: 1fr 380px;
-                gap: 20px;
-                padding: 20px;
-            }
+            .dashboard-grid { display: grid; grid-template-columns: 1fr 380px; gap: 20px; padding: 20px; }
             .fab { display: none; }
             .desktop-fab { display: block; }
         }
-        @media (max-width: 899px) {
-            .desktop-fab { display: none; }
-        }
+        @media (max-width: 899px) { .desktop-fab { display: none; } }
         .header {
             background: var(--primary);
             padding: 20px 20px 16px;
@@ -155,9 +143,7 @@
             border: 1px solid var(--border);
             white-space: nowrap;
         }
-        @media (max-width: 480px) {
-            .shortcut-item { font-size: 0.7rem; padding: 10px 4px; white-space: normal; }
-        }
+        @media (max-width: 480px) { .shortcut-item { font-size: 0.7rem; padding: 10px 4px; white-space: normal; } }
         .shortcut-item:active { transform: scale(0.96); background: var(--primary-soft); }
         .section-header {
             display: flex;
@@ -172,11 +158,7 @@
             padding: 0 16px 16px;
             -webkit-overflow-scrolling: touch;
         }
-        .week-days {
-            display: flex;
-            gap: 10px;
-            min-width: min-content;
-        }
+        .week-days { display: flex; gap: 10px; min-width: min-content; }
         .day-chip {
             background: var(--card-bg);
             padding: 10px 12px;
@@ -186,11 +168,7 @@
             cursor: pointer;
             border: 1px solid var(--border);
         }
-        .day-chip.today {
-            background: var(--primary-dark);
-            border-color: var(--primary-dark);
-            box-shadow: 0 2px 8px rgba(109,40,217,0.3);
-        }
+        .day-chip.today { background: var(--primary-dark); border-color: var(--primary-dark); box-shadow: 0 2px 8px rgba(109,40,217,0.3); }
         .day-chip.today .day-name, .day-chip.today .day-number, .day-chip.today .day-amount { color: white !important; }
         .day-name { font-size: 0.65rem; font-weight: 500; color: var(--text-gray); }
         .day-number { font-size: 1rem; font-weight: 700; margin-top: 4px; color: var(--text-dark); }
@@ -245,11 +223,7 @@
             justify-content: center;
             font-size: 0.75rem;
         }
-        .month-day.today {
-            background: var(--primary-light);
-            font-weight: 700;
-            border: 1px solid var(--primary);
-        }
+        .month-day.today { background: var(--primary-light); font-weight: 700; border: 1px solid var(--primary); }
         .month-day.has-income { border: 1px solid var(--success); background: #f0fdf4; }
         .month-day.has-expense { border: 1px solid var(--danger); background: #fef2f2; }
         .month-day.has-appointment { border-left: 3px solid #3b82f6; }
@@ -264,92 +238,6 @@
         .indicator-up { color: var(--success); }
         .indicator-down { color: var(--danger); }
         .indicator-up.paid, .indicator-down.paid { text-decoration: line-through; opacity: 0.6; }
-        .day-detail-card {
-            background: var(--card-bg);
-            margin: 0 16px 20px;
-            border-radius: 24px;
-            overflow: hidden;
-        }
-        @media (min-width: 900px) { .day-detail-card { margin: 0 0 20px 0; } }
-        .day-detail-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-            font-weight: 700;
-            font-size: 1rem;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .close-day-detail {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 0.75rem;
-        }
-        .detail-section {
-            margin-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 8px;
-        }
-        .detail-section:last-child { border-bottom: none; }
-        .detail-section-title {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--primary);
-            padding: 8px 16px;
-            background: var(--primary-soft);
-        }
-        .transaction-item, .non-financial-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            gap: 10px;
-            border-bottom: 1px solid var(--border);
-            flex-wrap: wrap;
-        }
-        .transaction-item.paid .transaction-title, .transaction-item.paid .transaction-amount {
-            text-decoration: line-through;
-            opacity: 0.7;
-        }
-        .transaction-icon, .non-financial-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--primary-soft);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-        }
-        .transaction-info, .non-financial-info { flex: 1; }
-        .transaction-title, .non-financial-title { font-weight: 600; font-size: 0.85rem; }
-        .transaction-date, .non-financial-detail { font-size: 0.65rem; color: var(--text-gray); }
-        .transaction-amount { font-weight: 700; font-size: 0.85rem; }
-        .delete-transaction, .edit-transaction, .repeat-transaction {
-            background: none;
-            border: none;
-            font-size: 0.9rem;
-            cursor: pointer;
-            padding: 0 6px;
-        }
-        .add-shortcut {
-            display: block;
-            width: calc(100% - 32px);
-            margin: 16px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-        }
         .week-summary {
             background: var(--card-bg);
             margin: 0 16px 20px;
@@ -554,15 +442,6 @@
             transition: width 0.3s;
         }
         .meta-status { font-size: 0.7rem; color: var(--text-gray); }
-        .small-btn {
-            background: var(--primary);
-            border: none;
-            color: white;
-            border-radius: 30px;
-            padding: 0 12px;
-            cursor: pointer;
-            font-weight: bold;
-        }
         .dark-mode-toggle {
             background: rgba(255,255,255,0.2);
             border: none;
@@ -572,6 +451,7 @@
             cursor: pointer;
             font-size: 0.75rem;
         }
+        /* Modo escuro - textos claros */
         body.dark-mode {
             --primary: #a78bfa;
             --primary-dark: #8b5cf6;
@@ -580,23 +460,62 @@
             --background: #111827;
             --card-bg: #1f2937;
             --text-dark: #f9fafb;
-            --text-gray: #9ca3af;
+            --text-gray: #d1d5db;
             --border: #374151;
             --success: #34d399;
             --danger: #f87171;
         }
-        body.dark-mode .month-day { background: #374151; }
-        body.dark-mode .month-day.today { background: #4c1d95; }
-        body.dark-mode .day-chip { background: #1f2937; }
-        body.dark-mode .transaction-item { border-bottom-color: #374151; }
+        body.dark-mode .month-day { background: #374151; color: #f9fafb; }
+        body.dark-mode .month-day.today { background: #4c1d95; color: white; }
+        body.dark-mode .day-chip { background: #1f2937; color: #f9fafb; }
+        body.dark-mode .transaction-item, body.dark-mode .non-financial-item { border-bottom-color: #374151; }
         body.dark-mode .modal-content, body.dark-mode .report-modal-content { background: #1f2937; color: #f9fafb; }
         body.dark-mode .close-modal, body.dark-mode .close-report-modal { background: #374151; color: white; }
         body.dark-mode .form-group input, body.dark-mode .form-group select, body.dark-mode .form-group textarea { background: #374151; border-color: #4b5563; color: white; }
+        body.dark-mode .btn-cancel { background: #374151; color: white; }
+        body.dark-mode .summary-item { background: #374151; }
+        body.dark-mode .insight-item { background: #374151; }
+        body.dark-mode .date-selector { background: #374151; }
+        body.dark-mode .selected-date-info { background: #374151; }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .week-scroll::-webkit-scrollbar { height: 4px; }
         .week-scroll::-webkit-scrollbar-track { background: var(--border); border-radius: 10px; }
         .week-scroll::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+        /* Estilos do modal de dia */
+        .day-modal-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .day-modal-item.paid .day-modal-title, .day-modal-item.paid .day-modal-amount {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        .day-modal-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-soft);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        .day-modal-info { flex: 1; }
+        .day-modal-title { font-weight: 600; font-size: 0.85rem; }
+        .day-modal-detail { font-size: 0.65rem; color: var(--text-gray); }
+        .day-modal-amount { font-weight: 700; font-size: 0.85rem; }
+        .day-modal-actions button {
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 0 6px;
+        }
     </style>
 </head>
 <body>
@@ -654,15 +573,6 @@
             </div>
         </div>
         <div class="right-column">
-            <div class="day-detail-card">
-                <div class="day-detail-header"><span>📅 <span id="selectedDateTitle">Hoje</span></span><button class="close-day-detail" onclick="closeDayDetail()" id="closeDayDetailBtn" style="display: none;">× Fechar</button></div>
-                <div id="dayDetailContent">
-                    <div class="detail-section"><div class="detail-section-title">💰 Financeiro</div><div id="selectedDateTransactions" class="empty-transactions">Selecione um dia no calendário</div></div>
-                    <div class="detail-section" id="appointmentsSection" style="display: none;"><div class="detail-section-title">📅 Compromissos</div><div id="appointmentsList"></div></div>
-                    <div class="detail-section" id="notesSection" style="display: none;"><div class="detail-section-title">📝 Anotações</div><div id="notesList"></div></div>
-                </div>
-                <button class="add-shortcut" onclick="openNewTransaction(selectedDate || new Date())">+ Adicionar transação</button>
-            </div>
             <div class="week-summary">
                 <div class="summary-item"><div class="summary-label">🔴 Despesas</div><div class="summary-value" id="totalExpense">R$ 0</div></div>
                 <div class="summary-item"><div class="summary-label">🟢 Receitas</div><div class="summary-value" id="totalIncome">R$ 0</div></div>
@@ -672,13 +582,13 @@
                 <div class="insights-header">💡 Insights do momento</div>
                 <div id="insightsContent" class="insights-content">Carregando...</div>
             </div>
-            <button class="desktop-fab" onclick="openNewTransaction(selectedDate || new Date())">➕ Nova transação</button>
+            <button class="desktop-fab" onclick="openNewTransaction(new Date())">➕ Nova transação</button>
         </div>
     </div>
 </div>
 <button class="fab" onclick="openNewTransaction(new Date())">+</button>
 
-<!-- Modal de Transação -->
+<!-- Modal de Transação (criar/editar) -->
 <div id="modal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h3 id="modalTitle">Nova transação</h3><button class="close-modal" onclick="closeModal()">Fechar</button></div>
@@ -715,12 +625,25 @@
     </div>
 </div>
 
+<!-- Modal de Detalhe do Dia (substitui a listagem da coluna direita) -->
+<div id="dayModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="dayModalTitle">Detalhes do dia</h3>
+            <button class="close-modal" onclick="closeDayModal()">Fechar</button>
+        </div>
+        <div id="dayModalContent" style="padding: 0 0 20px 0;"></div>
+        <div style="padding: 0 20px 20px;">
+            <button class="btn-save" onclick="openNewTransactionFromModal()">+ Adicionar transação</button>
+        </div>
+    </div>
+</div>
+
 <!-- Modal de Relatório -->
 <div id="reportModal" class="report-modal">
     <div class="report-modal-content" style="max-width:500px;">
         <div class="report-modal-header"><h3>📊 Relatório</h3><button class="close-report-modal" onclick="closeReportModal()">Fechar</button></div>
         <div id="reportModalContent"></div>
-        <!-- Gráfico de categorias removido -->
     </div>
 </div>
 
@@ -750,7 +673,7 @@
     // ========== VARIÁVEIS GLOBAIS ==========
     let currentUser = null;
     let items = [];
-    let selectedDate = new Date();
+    let selectedDateForModal = null; // data selecionada para o modal de detalhe
     let currentMonth = new Date();
     let editingItemId = null;
     let userSettings = { meta: 0 };
@@ -780,7 +703,7 @@
         refreshAllUI(); hideLoading(); 
     }
 
-    // ========== AUTOCOMPLETE DESCRIÇÃO (inteligente) ==========
+    // ========== AUTOCOMPLETE DESCRIÇÃO + SUGESTÃO DE VALOR ==========
     function getDescriptionSuggestions() {
         const transactions = items.filter(i => i.type === 'income' || i.type === 'expense');
         const freq = new Map();
@@ -793,7 +716,22 @@
         datalist.innerHTML = '';
         getDescriptionSuggestions().forEach(desc => { const opt = document.createElement('option'); opt.value = desc; datalist.appendChild(opt); });
     }
-
+    // Sugerir valor baseado na descrição (moda)
+    function suggestAmountByDescription(desc) {
+        if(!desc) return;
+        const matches = items.filter(i => (i.type === 'income' || i.type === 'expense') && i.title === desc);
+        if(matches.length === 0) return;
+        // calcular moda (valor mais frequente)
+        const freq = new Map();
+        matches.forEach(m => freq.set(m.amount, (freq.get(m.amount)||0)+1));
+        let mostFrequentAmount = null, maxCount = 0;
+        for(let [amt, count] of freq.entries()) {
+            if(count > maxCount) { maxCount = count; mostFrequentAmount = amt; }
+        }
+        if(mostFrequentAmount !== null) {
+            document.getElementById('amount').value = mostFrequentAmount;
+        }
+    }
     // ========== META ==========
     function updateMetaUI() {
         const meta = userSettings.meta || 0;
@@ -848,7 +786,7 @@
     function renderWeekCalendar() {
         const today=new Date(), start=new Date(today); start.setDate(today.getDate()-today.getDay());
         const weekDays=['DOM','SEG','TER','QUA','QUI','SEX','SÁB'], container=document.getElementById('weekDaysContainer'); container.innerHTML='';
-        for(let i=0;i<7;i++){ let d=new Date(start); d.setDate(start.getDate()+i); let summary=getDaySummary(d); let isToday=d.toDateString()===today.toDateString(); let chip=document.createElement('div'); chip.className=`day-chip ${isToday?'today':''}`; chip.onclick=()=>selectDate(d); chip.innerHTML=`<div class="day-name">${weekDays[i]}</div><div class="day-number">${d.getDate()}</div><div class="day-amount ${summary.balance>=0?'amount-positive':'amount-negative'}">${summary.balance>=0?'+':'-'}R$ ${Math.abs(summary.balance).toFixed(2)}</div>`; container.appendChild(chip); }
+        for(let i=0;i<7;i++){ let d=new Date(start); d.setDate(start.getDate()+i); let summary=getDaySummary(d); let isToday=d.toDateString()===today.toDateString(); let chip=document.createElement('div'); chip.className=`day-chip ${isToday?'today':''}`; chip.onclick=()=>showDayModal(d); chip.innerHTML=`<div class="day-name">${weekDays[i]}</div><div class="day-number">${d.getDate()}</div><div class="day-amount ${summary.balance>=0?'amount-positive':'amount-negative'}">${summary.balance>=0?'+':'-'}R$ ${Math.abs(summary.balance).toFixed(2)}</div>`; container.appendChild(chip); }
         document.getElementById('currentMonthLabel').innerHTML=today.toLocaleDateString('pt-BR',{month:'short',year:'numeric'});
     }
     function renderMonthCalendar() {
@@ -871,82 +809,126 @@
             if (hasAppointment) indicators += `<span class="indicator-appointment">📅</span>`;
             if (hasNote) indicators += `<span class="indicator-note">📝</span>`;
             dayDiv.innerHTML=`<div class="day-number">${day}</div>${indicators?`<div class="day-indicators">${indicators}</div>`:''}`; 
-            dayDiv.onclick=()=>selectDate(d); grid.appendChild(dayDiv); 
+            dayDiv.onclick=()=>showDayModal(d); 
+            grid.appendChild(dayDiv); 
         }
     }
-    function selectDate(date) { 
-        selectedDate = date; 
-        document.getElementById('selectedDateTitle').innerHTML = formatDateDisplay(date);
-        updateDayDetail();
-        document.getElementById('closeDayDetailBtn').style.display = 'inline-block';
-    }
-    function closeDayDetail() {
-        document.getElementById('selectedDateTransactions').innerHTML = '<div class="empty-transactions">Nenhum dia selecionado</div>';
-        document.getElementById('appointmentsList').innerHTML = '';
-        document.getElementById('notesList').innerHTML = '';
-        document.getElementById('appointmentsSection').style.display = 'none';
-        document.getElementById('notesSection').style.display = 'none';
-        document.getElementById('selectedDateTitle').innerHTML = 'Nenhum dia';
-        document.getElementById('closeDayDetailBtn').style.display = 'none';
-        selectedDate = null;
-    }
-    function updateDayDetail() {
-        if (!selectedDate) return;
-        let dayItems = getFinancialItemsForDate(selectedDate);
-        let container = document.getElementById('selectedDateTransactions');
-        if(dayItems.length === 0){ container.innerHTML = '<div class="empty-transactions">Nenhuma transação financeira neste dia</div>'; } 
-        else {
-            container.innerHTML = '';
-            dayItems.forEach(item => { 
-                let globalIndex = items.findIndex(i => i.id === item.id); 
-                let amountClass = item.type === 'expense' ? 'amount-negative' : 'amount-positive'; 
-                let signal = item.type === 'expense' ? '-' : '+'; 
-                let icon = item.type === 'expense' ? '💸' : '💰'; 
-                let div = document.createElement('div'); 
-                div.className = `transaction-item ${item.status === 'paid' ? 'paid' : ''}`; 
-                div.innerHTML = `<div class="transaction-icon">${icon}</div><div class="transaction-info"><div class="transaction-title">${item.title}</div><div class="transaction-date">${item.status === 'paid' ? '✅ Pago' : '⏳ Pendente'}</div></div><div class="transaction-amount ${amountClass}">${signal} R$ ${item.amount.toFixed(2)}</div><button class="edit-transaction" onclick="editTransaction(${globalIndex})">✏️</button><button class="delete-transaction" onclick="deleteItem(${globalIndex})">🗑️</button><button class="repeat-transaction" onclick="repeatTransaction(${globalIndex})">↻</button>`; 
-                container.appendChild(div); 
+
+    // ========== MODAL DO DIA (substitui a listagem anterior) ==========
+    function showDayModal(date) {
+        selectedDateForModal = date;
+        document.getElementById('dayModalTitle').innerHTML = formatDateDisplay(date);
+        const container = document.getElementById('dayModalContent');
+        container.innerHTML = '';
+        
+        // Seção Financeiro
+        const financialItems = getFinancialItemsForDate(date);
+        const finDiv = document.createElement('div');
+        finDiv.className = 'detail-section';
+        finDiv.innerHTML = `<div class="detail-section-title">💰 Financeiro</div>`;
+        if(financialItems.length === 0) {
+            finDiv.innerHTML += '<div style="padding:16px; text-align:center; color:var(--text-gray);">Nenhuma transação financeira neste dia</div>';
+        } else {
+            financialItems.forEach(item => {
+                const globalIndex = items.findIndex(i => i.id === item.id);
+                const amountClass = item.type === 'expense' ? 'amount-negative' : 'amount-positive';
+                const signal = item.type === 'expense' ? '-' : '+';
+                const icon = item.type === 'expense' ? '💸' : '💰';
+                const div = document.createElement('div');
+                div.className = `day-modal-item ${item.status === 'paid' ? 'paid' : ''}`;
+                div.innerHTML = `
+                    <div class="day-modal-icon">${icon}</div>
+                    <div class="day-modal-info">
+                        <div class="day-modal-title">${item.title}</div>
+                        <div class="day-modal-detail">${item.status === 'paid' ? '✅ Pago' : '⏳ Pendente'}</div>
+                    </div>
+                    <div class="day-modal-amount ${amountClass}">${signal} R$ ${item.amount.toFixed(2)}</div>
+                    <div class="day-modal-actions">
+                        <button onclick="editTransaction(${globalIndex}); closeDayModal();">✏️</button>
+                        <button onclick="deleteItem(${globalIndex}); closeDayModal();">🗑️</button>
+                        <button onclick="repeatTransaction(${globalIndex}); closeDayModal();">↻</button>
+                    </div>
+                `;
+                finDiv.appendChild(div);
             });
         }
-        let appointments = getAppointmentsForDate(selectedDate);
-        const appointmentsSection = document.getElementById('appointmentsSection');
-        const appointmentsList = document.getElementById('appointmentsList');
-        if (appointments.length === 0) appointmentsSection.style.display = 'none';
-        else {
-            appointmentsSection.style.display = 'block';
-            appointmentsList.innerHTML = '';
+        container.appendChild(finDiv);
+        
+        // Seção Compromissos
+        const appointments = getAppointmentsForDate(date);
+        const appDiv = document.createElement('div');
+        appDiv.className = 'detail-section';
+        appDiv.innerHTML = `<div class="detail-section-title">📅 Compromissos</div>`;
+        if(appointments.length === 0) {
+            appDiv.innerHTML += '<div style="padding:16px; text-align:center; color:var(--text-gray);">Nenhum compromisso neste dia</div>';
+        } else {
             appointments.forEach(app => {
-                let index = items.findIndex(i => i.id === app.id);
-                let div = document.createElement('div');
-                div.className = 'non-financial-item';
-                div.innerHTML = `<div class="non-financial-icon">📅</div><div class="non-financial-info"><div class="non-financial-title">${app.title}</div><div class="non-financial-detail">${app.time ? `🕒 ${app.time}` : ''} ${app.location ? `📍 ${app.location}` : ''}</div></div><button class="delete-transaction" onclick="deleteItem(${index})">🗑️</button>`;
-                appointmentsList.appendChild(div);
+                const index = items.findIndex(i => i.id === app.id);
+                const div = document.createElement('div');
+                div.className = 'day-modal-item';
+                div.innerHTML = `
+                    <div class="day-modal-icon">📅</div>
+                    <div class="day-modal-info">
+                        <div class="day-modal-title">${app.title}</div>
+                        <div class="day-modal-detail">${app.time ? `🕒 ${app.time}` : ''} ${app.location ? `📍 ${app.location}` : ''}</div>
+                    </div>
+                    <div class="day-modal-actions">
+                        <button onclick="deleteItem(${index}); closeDayModal();">🗑️</button>
+                    </div>
+                `;
+                appDiv.appendChild(div);
             });
         }
-        let notes = getNotesForDate(selectedDate);
-        const notesSection = document.getElementById('notesSection');
-        const notesList = document.getElementById('notesList');
-        if (notes.length === 0) notesSection.style.display = 'none';
-        else {
-            notesSection.style.display = 'block';
-            notesList.innerHTML = '';
+        container.appendChild(appDiv);
+        
+        // Seção Anotações
+        const notes = getNotesForDate(date);
+        const notesDiv = document.createElement('div');
+        notesDiv.className = 'detail-section';
+        notesDiv.innerHTML = `<div class="detail-section-title">📝 Anotações</div>`;
+        if(notes.length === 0) {
+            notesDiv.innerHTML += '<div style="padding:16px; text-align:center; color:var(--text-gray);">Nenhuma anotação neste dia</div>';
+        } else {
             notes.forEach(note => {
-                let index = items.findIndex(i => i.id === note.id);
-                let div = document.createElement('div');
-                div.className = 'non-financial-item';
-                div.innerHTML = `<div class="non-financial-icon">📝</div><div class="non-financial-info"><div class="non-financial-title">${note.title}</div><div class="non-financial-detail">${note.content ? note.content.substring(0,100) : ''}</div></div><button class="delete-transaction" onclick="deleteItem(${index})">🗑️</button>`;
-                notesList.appendChild(div);
+                const index = items.findIndex(i => i.id === note.id);
+                const div = document.createElement('div');
+                div.className = 'day-modal-item';
+                div.innerHTML = `
+                    <div class="day-modal-icon">📝</div>
+                    <div class="day-modal-info">
+                        <div class="day-modal-title">${note.title}</div>
+                        <div class="day-modal-detail">${note.content ? note.content.substring(0,100) : ''}</div>
+                    </div>
+                    <div class="day-modal-actions">
+                        <button onclick="deleteItem(${index}); closeDayModal();">🗑️</button>
+                    </div>
+                `;
+                notesDiv.appendChild(div);
             });
+        }
+        container.appendChild(notesDiv);
+        
+        document.getElementById('dayModal').style.display = 'flex';
+    }
+    function closeDayModal() {
+        document.getElementById('dayModal').style.display = 'none';
+        selectedDateForModal = null;
+    }
+    function openNewTransactionFromModal() {
+        if(selectedDateForModal) {
+            openNewTransaction(selectedDateForModal);
+            closeDayModal();
         }
     }
+    
     function repeatTransaction(index) {
         const original = items[index];
         if (!original) return;
-        selectedDate = new Date();
+        const newDate = new Date();
         document.getElementById('modalTitle').innerHTML = 'Repetir transação';
-        document.getElementById('modalDateInfo').innerHTML = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(selectedDate)}"></div>`;
+        document.getElementById('modalDateInfo').innerHTML = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(newDate)}"></div>`;
         const dateInput = document.getElementById('transactionDate');
-        if (dateInput) dateInput.addEventListener('change', (e) => { const newDate = new Date(e.target.value); if (!isNaN(newDate.getTime())) selectedDate = newDate; });
+        if (dateInput) dateInput.addEventListener('change', (e) => { const newDate2 = new Date(e.target.value); if (!isNaN(newDate2.getTime())) selectedDateForModal = newDate2; });
         document.getElementById('modal').style.display = 'flex';
         document.querySelector('[data-tab="financial"]').click();
         document.getElementById('type').value = original.type;
@@ -954,31 +936,43 @@
         document.getElementById('amount').value = original.amount;
         document.getElementById('status').value = original.status || 'pending';
         editingItemId = null;
+        selectedDateForModal = newDate;
     }
+    
     function editTransaction(index) { 
         const item = items[index]; if(!item) return;
-        editingItemId = item.id; selectedDate = new Date(item.date);
+        editingItemId = item.id;
+        const editDate = new Date(item.date);
         document.getElementById('modalTitle').innerHTML = 'Editar transação';
-        document.getElementById('modalDateInfo').innerHTML = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(selectedDate)}"></div>`;
+        document.getElementById('modalDateInfo').innerHTML = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(editDate)}"></div>`;
         const dateInput = document.getElementById('transactionDate');
-        if (dateInput) dateInput.addEventListener('change', (e) => { const newDate = new Date(e.target.value); if (!isNaN(newDate.getTime())) selectedDate = newDate; });
+        if (dateInput) dateInput.addEventListener('change', (e) => { const newDate = new Date(e.target.value); if (!isNaN(newDate.getTime())) selectedDateForModal = newDate; });
         document.getElementById('modal').style.display = 'flex';
         document.querySelector('[data-tab="financial"]').click();
         document.getElementById('type').value = item.type;
         document.getElementById('description').value = item.title;
         document.getElementById('amount').value = item.amount;
         document.getElementById('status').value = item.status || 'pending';
+        selectedDateForModal = editDate;
     }
+    
     function openNewTransaction(date, presetType = null) { 
-        editingItemId = null; selectedDate = date || new Date();
+        editingItemId = null;
+        const targetDate = date || new Date();
+        selectedDateForModal = targetDate;
         document.getElementById('modalTitle').innerHTML = 'Nova transação';
-        document.getElementById('modalDateInfo').innerHTML = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(selectedDate)}"></div>`;
+        document.getElementById('modalDateInfo').innerHTML = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(targetDate)}"></div>`;
         const dateInput = document.getElementById('transactionDate');
-        if (dateInput) dateInput.addEventListener('change', (e) => { const newDate = new Date(e.target.value); if (!isNaN(newDate.getTime())) selectedDate = newDate; });
+        if (dateInput) dateInput.addEventListener('change', (e) => { const newDate = new Date(e.target.value); if (!isNaN(newDate.getTime())) selectedDateForModal = newDate; });
         document.getElementById('modal').style.display = 'flex';
         document.getElementById('financialForm').reset();
         if (presetType) document.getElementById('type').value = presetType;
+        // evento para sugestão de valor ao digitar descrição
+        const descInput = document.getElementById('description');
+        const oldListener = descInput.oninput;
+        descInput.oninput = function() { suggestAmountByDescription(this.value); };
     }
+    
     function updateBalances() { 
         let week=getWeekBalance(new Date()), month=getMonthStats(); 
         document.getElementById('mainBalance').innerHTML=`R$ ${month.balance.toLocaleString('pt-BR',{minimumFractionDigits:2})}`; 
@@ -991,10 +985,10 @@
         document.getElementById('totalBalance').innerHTML=`R$ ${week.balance.toFixed(2)}`; 
         updateMetaUI(); generateInsights(); 
     }
-    function refreshAllUI() { renderWeekCalendar(); renderMonthCalendar(); if(selectedDate){ document.getElementById('selectedDateTitle').innerHTML=formatDateDisplay(selectedDate); updateDayDetail(); } updateBalances(); updateDescriptionDatalist(); }
+    function refreshAllUI() { renderWeekCalendar(); renderMonthCalendar(); updateBalances(); updateDescriptionDatalist(); }
     function saveData() { refreshAllUI(); if(currentUser) saveToCloud(); }
     function closeModal() { document.getElementById('modal').style.display='none'; editingItemId=null; refreshAllUI(); }
-    function deleteItem(index) { if(confirm('⚠️ Tem certeza que deseja EXCLUIR esta transação?')){ items.splice(index,1); saveData(); } }
+    function deleteItem(index) { if(confirm('⚠️ Tem certeza que deseja EXCLUIR esta transação?')){ items.splice(index,1); saveData(); if(selectedDateForModal) showDayModal(selectedDateForModal); } }
 
     // ========== RELATÓRIOS ==========
     function openFullReport() {
@@ -1017,8 +1011,8 @@
         document.getElementById('reportModal').style.display='flex'; 
     }
     function closeReportModal() { document.getElementById('reportModal').style.display='none'; }
-    function prevMonth() { currentMonth.setMonth(currentMonth.getMonth()-1); renderMonthCalendar(); if(selectedDate) selectDate(selectedDate); }
-    function nextMonth() { currentMonth.setMonth(currentMonth.getMonth()+1); renderMonthCalendar(); if(selectedDate) selectDate(selectedDate); }
+    function prevMonth() { currentMonth.setMonth(currentMonth.getMonth()-1); renderMonthCalendar(); }
+    function nextMonth() { currentMonth.setMonth(currentMonth.getMonth()+1); renderMonthCalendar(); }
 
     // ========== AUTENTICAÇÃO ==========
     async function login() { 
@@ -1040,14 +1034,14 @@
     });
     document.getElementById('financialForm').addEventListener('submit',(e)=>{ 
         e.preventDefault(); 
-        const newTransaction = { id: editingItemId || Date.now(), type: document.getElementById('type').value, title: document.getElementById('description').value, amount: parseFloat(document.getElementById('amount').value), status: document.getElementById('status').value, date: formatDateKey(selectedDate) };
+        const newTransaction = { id: editingItemId || Date.now(), type: document.getElementById('type').value, title: document.getElementById('description').value, amount: parseFloat(document.getElementById('amount').value), status: document.getElementById('status').value, date: formatDateKey(selectedDateForModal || new Date()) };
         if(editingItemId){ const idx = items.findIndex(i=>i.id===editingItemId); if(idx!==-1) items[idx]=newTransaction; else items.push(newTransaction); } else items.push(newTransaction);
-        saveData(); closeModal(); editingItemId=null;
+        saveData(); closeModal(); 
     });
-    document.getElementById('appointmentForm').addEventListener('submit',(e)=>{ e.preventDefault(); items.push({ id:Date.now(), type:'appointment', title:document.getElementById('appointmentTitle').value, time:document.getElementById('appointmentTime').value, location:document.getElementById('appointmentLocation').value, date:formatDateKey(selectedDate) }); saveData(); closeModal(); });
-    document.getElementById('noteForm').addEventListener('submit',(e)=>{ e.preventDefault(); items.push({ id:Date.now(), type:'note', title:document.getElementById('noteTitle').value, content:document.getElementById('noteContent').value, date:formatDateKey(selectedDate) }); saveData(); closeModal(); });
+    document.getElementById('appointmentForm').addEventListener('submit',(e)=>{ e.preventDefault(); items.push({ id:Date.now(), type:'appointment', title:document.getElementById('appointmentTitle').value, time:document.getElementById('appointmentTime').value, location:document.getElementById('appointmentLocation').value, date:formatDateKey(selectedDateForModal || new Date()) }); saveData(); closeModal(); });
+    document.getElementById('noteForm').addEventListener('submit',(e)=>{ e.preventDefault(); items.push({ id:Date.now(), type:'note', title:document.getElementById('noteTitle').value, content:document.getElementById('noteContent').value, date:formatDateKey(selectedDateForModal || new Date()) }); saveData(); closeModal(); });
     document.querySelectorAll('.tab-btn').forEach(btn=>{ btn.addEventListener('click',function(){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); document.getElementById(this.dataset.tab+'Tab').classList.add('active'); }); });
-    window.onclick=(e)=>{ if(e.target===document.getElementById('modal')) closeModal(); if(e.target===document.getElementById('reportModal')) closeReportModal(); if(e.target===document.getElementById('metaModal')) closeMetaModal(); };
+    window.onclick=(e)=>{ if(e.target===document.getElementById('modal')) closeModal(); if(e.target===document.getElementById('reportModal')) closeReportModal(); if(e.target===document.getElementById('metaModal')) closeMetaModal(); if(e.target===document.getElementById('dayModal')) closeDayModal(); };
 
     // Modo escuro
     const darkModeToggle = document.getElementById('darkModeToggle');
@@ -1062,9 +1056,9 @@
     if(loginPassword) loginPassword.addEventListener('keypress', handleLoginEnter);
     if(loginBtn) loginBtn.onclick = login;
     // Expor funções globais
-    window.login = login; window.signup = signup; window.logout = logout; window.openNewTransaction = openNewTransaction; window.editTransaction = editTransaction; window.closeModal = closeModal; window.deleteItem = deleteItem; window.openFullReport = openFullReport; window.generateWeeklyReport = generateWeeklyReport; window.generateMonthlyReport = generateMonthlyReport; window.closeReportModal = closeReportModal; window.prevMonth = prevMonth; window.nextMonth = nextMonth; window.selectDate = selectDate; window.closeDayDetail = closeDayDetail; window.repeatTransaction = repeatTransaction; window.editMeta = editMeta; window.saveMeta = saveMeta; window.closeMetaModal = closeMetaModal;
+    window.login = login; window.signup = signup; window.logout = logout; window.openNewTransaction = openNewTransaction; window.editTransaction = editTransaction; window.closeModal = closeModal; window.deleteItem = deleteItem; window.openFullReport = openFullReport; window.generateWeeklyReport = generateWeeklyReport; window.generateMonthlyReport = generateMonthlyReport; window.closeReportModal = closeReportModal; window.prevMonth = prevMonth; window.nextMonth = nextMonth; window.showDayModal = showDayModal; window.closeDayModal = closeDayModal; window.repeatTransaction = repeatTransaction; window.openNewTransactionFromModal = openNewTransactionFromModal; window.editMeta = editMeta; window.saveMeta = saveMeta; window.closeMetaModal = closeMetaModal;
     // Inicialização
-    selectedDate=new Date(); refreshAllUI(); document.getElementById('selectedDateTitle').innerHTML=formatDateDisplay(selectedDate);
+    refreshAllUI();
 </script>
 </body>
 </html>
