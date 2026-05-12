@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <title>Dinheiro em Dia</title>
+    <title>Dinheiro em Dia • Banco Inteligente</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -15,463 +15,105 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-        :root {
-            --primary: #8b5cf6;
-            --primary-dark: #6d28d9;
-            --primary-light: #ede9fe;
-            --primary-soft: #f5f3ff;
-            --background: #fafafa;
-            --card-bg: #ffffff;
-            --text-dark: #1e1e2f;
-            --text-gray: #6b7280;
-            --border: #e9ecef;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: var(--primary);
-            background: linear-gradient(145deg, var(--primary) 0%, var(--primary-dark) 100%);
-            min-height: 100vh;
-            padding: 0;
-        }
-        .app-container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            background: var(--background);
-            min-height: 100vh;
-            box-shadow: 0 0 40px rgba(0,0,0,0.1);
-        }
-        .dashboard-grid {
-            display: block;
-            padding: 0 0 80px 0;
-        }
-        @media (min-width: 900px) {
-            .dashboard-grid {
-                display: grid;
-                grid-template-columns: 1fr 380px;
-                gap: 20px;
-                padding: 20px;
-            }
-            .fab { display: none; }
-            .desktop-fab { display: block; }
-        }
-        @media (max-width: 899px) {
-            .desktop-fab { display: none; }
-        }
-        /* Header */
-        .header {
-            background: var(--primary);
-            padding: 20px 20px 16px;
-            color: white;
-        }
-        .logo h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        .logo p {
-            font-size: 0.7rem;
-            opacity: 0.85;
-            margin-top: 4px;
-        }
-        .auth-section {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-        .auth-section input {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            padding: 10px 12px;
-            border-radius: 30px;
-            color: white;
-            font-size: 0.8rem;
-            flex: 1;
-            min-width: 120px;
-        }
+        :root { --primary: #8b5cf6; --primary-dark: #6d28d9; --primary-light: #ede9fe; --primary-soft: #f5f3ff; --background: #fafafa; --card-bg: #ffffff; --text-dark: #1e1e2f; --text-gray: #6b7280; --border: #e9ecef; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--primary); background: linear-gradient(145deg, var(--primary) 0%, var(--primary-dark) 100%); min-height: 100vh; padding: 0; }
+        .app-container { width: 100%; max-width: 1200px; margin: 0 auto; background: var(--background); min-height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+        .dashboard-grid { display: block; padding: 0 0 80px 0; }
+        @media (min-width: 900px) { .dashboard-grid { display: grid; grid-template-columns: 1fr 380px; gap: 20px; padding: 20px; } .fab { display: none; } .desktop-fab { display: block; } }
+        @media (max-width: 899px) { .desktop-fab { display: none; } }
+        .header { background: var(--primary); padding: 20px 20px 16px; color: white; }
+        .logo h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+        .logo p { font-size: 0.7rem; opacity: 0.85; margin-top: 4px; }
+        .auth-section { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .auth-section input { background: rgba(255,255,255,0.2); border: none; padding: 10px 12px; border-radius: 30px; color: white; font-size: 0.8rem; flex: 1; min-width: 120px; }
         .auth-section input::placeholder { color: rgba(255,255,255,0.7); }
-        .auth-section button {
-            background: white;
-            color: var(--primary);
-            border: none;
-            padding: 8px 18px;
-            border-radius: 30px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .user-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 12px;
-            background: rgba(255,255,255,0.15);
-            padding: 10px 16px;
-            border-radius: 40px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .logout-btn {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 30px;
-            cursor: pointer;
-        }
-        /* cards */
-        .balance-card {
-            background: var(--card-bg);
-            margin: 16px;
-            border-radius: 28px;
-            padding: 24px 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
+        .auth-section button { background: white; color: var(--primary); border: none; padding: 8px 18px; border-radius: 30px; font-weight: 600; cursor: pointer; }
+        .user-info { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; background: rgba(255,255,255,0.15); padding: 10px 16px; border-radius: 40px; flex-wrap: wrap; gap: 10px; }
+        .logout-btn { background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 14px; border-radius: 30px; cursor: pointer; }
+        .balance-card { background: var(--card-bg); margin: 16px; border-radius: 28px; padding: 24px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         @media (min-width: 900px) { .balance-card { margin: 0 0 20px 0; } }
-        .balance-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: var(--primary);
-            font-weight: 700;
-        }
-        .main-balance {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin: 8px 0 4px;
-            word-break: break-word;
-        }
+        .balance-label { font-size: 0.7rem; text-transform: uppercase; color: var(--primary); font-weight: 700; }
+        .main-balance { font-size: 2.5rem; font-weight: 800; color: var(--text-dark); margin: 8px 0 4px; word-break: break-word; }
         @media (min-width: 600px) { .main-balance { font-size: 2.8rem; } }
-        .balance-stats {
-            display: flex;
-            gap: 20px;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border);
-            flex-wrap: wrap;
-        }
+        .balance-stats { display: flex; gap: 20px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); flex-wrap: wrap; }
         .stat { flex: 1; min-width: 100px; }
         .stat-label { font-size: 0.7rem; color: var(--text-gray); margin-bottom: 4px; }
         .stat-value { font-size: 1rem; font-weight: 700; }
         .stat-income { color: var(--success); }
         .stat-expense { color: var(--danger); }
-        /* atalhos */
-        .shortcuts {
-            display: flex;
-            gap: 10px;
-            margin: 0 16px 20px;
-            flex-wrap: wrap;
-        }
-        .shortcut-item {
-            flex: 1;
-            background: var(--card-bg);
-            text-align: center;
-            padding: 12px 6px;
-            border-radius: 60px;
-            font-weight: 600;
-            font-size: 0.8rem;
-            color: var(--primary);
-            cursor: pointer;
-            transition: all 0.15s;
-            border: 1px solid var(--border);
-            white-space: nowrap;
-        }
-        @media (max-width: 480px) {
-            .shortcut-item { font-size: 0.7rem; padding: 10px 4px; white-space: normal; }
-        }
+        .shortcuts { display: flex; gap: 10px; margin: 0 16px 20px; flex-wrap: wrap; }
+        .shortcut-item { flex: 1; background: var(--card-bg); text-align: center; padding: 12px 6px; border-radius: 60px; font-weight: 600; font-size: 0.8rem; color: var(--primary); cursor: pointer; transition: all 0.15s; border: 1px solid var(--border); white-space: nowrap; }
+        @media (max-width: 480px) { .shortcut-item { font-size: 0.7rem; padding: 10px 4px; white-space: normal; } }
         .shortcut-item:active { transform: scale(0.96); background: var(--primary-soft); }
-        /* semana */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            padding: 8px 16px;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        .week-scroll {
-            overflow-x: auto;
-            padding: 0 16px 16px;
-            -webkit-overflow-scrolling: touch;
-        }
+        .section-header { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 16px; font-weight: 600; font-size: 0.85rem; }
+        .week-scroll { overflow-x: auto; padding: 0 16px 16px; -webkit-overflow-scrolling: touch; }
         .week-days { display: flex; gap: 10px; min-width: min-content; }
-        .day-chip {
-            background: var(--card-bg);
-            padding: 10px 12px;
-            border-radius: 60px;
-            text-align: center;
-            min-width: 65px;
-            cursor: pointer;
-            transition: all 0.15s;
-            border: 1px solid var(--border);
-        }
-        .day-chip.today {
-            background: var(--primary-dark);
-            border-color: var(--primary-dark);
-            box-shadow: 0 2px 8px rgba(109,40,217,0.3);
-        }
+        .day-chip { background: var(--card-bg); padding: 10px 12px; border-radius: 60px; text-align: center; min-width: 65px; cursor: pointer; transition: all 0.15s; border: 1px solid var(--border); }
+        .day-chip.today { background: var(--primary-dark); border-color: var(--primary-dark); box-shadow: 0 2px 8px rgba(109,40,217,0.3); }
         .day-chip.today .day-name, .day-chip.today .day-number, .day-chip.today .day-amount { color: white !important; }
         .day-name { font-size: 0.65rem; font-weight: 500; color: var(--text-gray); }
         .day-number { font-size: 1rem; font-weight: 700; margin-top: 4px; color: var(--text-dark); }
         .day-amount { font-size: 0.6rem; font-weight: 600; margin-top: 6px; }
         .amount-positive { color: var(--success); }
         .amount-negative { color: var(--danger); }
-        /* mês */
-        .month-card {
-            background: var(--card-bg);
-            margin: 0 16px 20px;
-            border-radius: 24px;
-            padding: 16px;
-        }
+        .month-card { background: var(--card-bg); margin: 0 16px 20px; border-radius: 24px; padding: 16px; }
         @media (min-width: 900px) { .month-card { margin: 0 0 20px 0; } }
-        .month-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .month-nav {
-            background: var(--primary-soft);
-            border: none;
-            padding: 8px 16px;
-            border-radius: 30px;
-            color: var(--primary);
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .month-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-        }
-        .weekday-header {
-            text-align: center;
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: var(--text-gray);
-            padding: 8px 0;
-        }
-        .month-day {
-            text-align: center;
-            padding: 8px 4px;
-            font-weight: 500;
-            border-radius: 16px;
-            cursor: pointer;
-            background: var(--background);
-            min-height: 55px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-        }
-        .month-day.today {
-            background: var(--primary-light);
-            color: var(--text-dark) !important;
-            font-weight: 700;
-            border: 1px solid var(--primary);
-        }
+        .month-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .month-nav { background: var(--primary-soft); border: none; padding: 8px 16px; border-radius: 30px; color: var(--primary); font-weight: 600; cursor: pointer; }
+        .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .weekday-header { text-align: center; font-size: 0.65rem; font-weight: 600; color: var(--text-gray); padding: 8px 0; }
+        .month-day { text-align: center; padding: 8px 4px; font-weight: 500; border-radius: 16px; cursor: pointer; background: var(--background); min-height: 55px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; }
+        .month-day.today { background: var(--primary-light); color: var(--text-dark) !important; font-weight: 700; border: 1px solid var(--primary); }
         .month-day.has-income { border: 1px solid var(--success); background: #f0fdf4; }
         .month-day.has-expense { border: 1px solid var(--danger); background: #fef2f2; }
         .day-indicators { font-size: 0.6rem; margin-top: 4px; display: flex; gap: 4px; justify-content: center; }
         .indicator-up { color: var(--success); }
         .indicator-down { color: var(--danger); }
-        /* transações */
-        .transactions-card {
-            background: var(--card-bg);
-            margin: 0 16px 20px;
-            border-radius: 24px;
-            overflow: hidden;
-        }
+        .transactions-card { background: var(--card-bg); margin: 0 16px 20px; border-radius: 24px; overflow: hidden; }
         @media (min-width: 900px) { .transactions-card { margin: 0 0 20px 0; } }
-        .transactions-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-            font-weight: 600;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .transaction-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            border-bottom: 1px solid #f0f0f0;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+        .transactions-header { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid var(--border); font-weight: 600; flex-wrap: wrap; gap: 10px; }
+        .transaction-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f0f0f0; gap: 10px; flex-wrap: wrap; }
         @media (max-width: 480px) { .transaction-item { flex-direction: column; align-items: flex-start; } }
-        .transaction-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--primary-soft);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-        }
+        .transaction-icon { width: 40px; height: 40px; background: var(--primary-soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
         .transaction-info { flex: 1; }
         .transaction-title { font-weight: 600; font-size: 0.85rem; }
         .transaction-date { font-size: 0.65rem; color: var(--text-gray); }
         .transaction-amount { font-weight: 700; font-size: 0.85rem; }
         .amount-negative { color: var(--danger); }
         .amount-positive { color: var(--success); }
-        .delete-transaction, .edit-transaction {
-            background: none;
-            border: none;
-            font-size: 0.9rem;
-            cursor: pointer;
-            padding: 0 6px;
-        }
+        .delete-transaction, .edit-transaction { background: none; border: none; font-size: 0.9rem; cursor: pointer; padding: 0 6px; }
         .empty-transactions { text-align: center; padding: 40px 20px; color: var(--text-gray); }
-        /* resumo semana */
-        .week-summary {
-            background: var(--card-bg);
-            margin: 0 16px 30px;
-            border-radius: 24px;
-            padding: 16px;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
+        .week-summary { background: var(--card-bg); margin: 0 16px 30px; border-radius: 24px; padding: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
         .summary-item { flex: 1; text-align: center; padding: 10px; background: var(--background); border-radius: 20px; }
         .summary-label { font-size: 0.65rem; color: var(--text-gray); }
         .summary-value { font-weight: 800; font-size: 0.9rem; }
-        /* botoes */
-        .fab {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--primary);
-            width: 56px;
-            height: 56px;
-            border-radius: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(139,92,246,0.4);
-            cursor: pointer;
-            color: white;
-            font-size: 24px;
-            border: none;
-            z-index: 100;
-        }
-        .desktop-fab {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            margin: 0 16px 20px;
-            width: calc(100% - 32px);
-        }
+        .fab { position: fixed; bottom: 20px; right: 20px; background: var(--primary); width: 56px; height: 56px; border-radius: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(139,92,246,0.4); cursor: pointer; color: white; font-size: 24px; border: none; z-index: 100; }
+        .desktop-fab { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 40px; font-weight: 600; cursor: pointer; margin: 0 16px 20px; width: calc(100% - 32px); }
         @media (min-width: 900px) { .desktop-fab { margin: 0 0 20px 0; width: 100%; } }
-        /* modais */
-        .modal, .day-modal, .report-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-content, .day-modal-content, .report-modal-content {
-            background: white;
-            width: 90%;
-            max-width: 500px;
-            border-radius: 28px;
-            animation: fadeIn 0.2s ease;
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
-        }
-        .close-modal {
-            background: #f3f4f6;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 30px;
-            cursor: pointer;
-        }
-        .modal-tabs {
-            display: flex;
-            gap: 8px;
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--border);
-            flex-wrap: wrap;
-        }
-        .tab-btn {
-            background: none;
-            border: none;
-            padding: 8px 16px;
-            font-weight: 600;
-            color: var(--text-gray);
-            border-radius: 40px;
-            cursor: pointer;
-        }
+        .modal, .day-modal, .report-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-content, .day-modal-content, .report-modal-content { background: white; width: 90%; max-width: 500px; border-radius: 28px; animation: fadeIn 0.2s ease; max-height: 85vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--border); }
+        .close-modal { background: #f3f4f6; border: none; padding: 8px 16px; border-radius: 30px; cursor: pointer; }
+        .modal-tabs { display: flex; gap: 8px; padding: 12px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+        .tab-btn { background: none; border: none; padding: 8px 16px; font-weight: 600; color: var(--text-gray); border-radius: 40px; cursor: pointer; }
         .tab-btn.active { background: var(--primary-light); color: var(--primary); }
         .tab-content { display: none; padding: 20px; }
         .tab-content.active { display: block; }
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-gray); margin-bottom: 6px; }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            font-size: 0.9rem;
-        }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 14px; font-size: 0.9rem; }
         .form-buttons { display: flex; gap: 12px; margin-top: 20px; }
         .btn-save { flex: 1; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 40px; font-weight: 700; cursor: pointer; }
         .btn-cancel { flex: 1; background: #f3f4f6; color: var(--text-dark); border: none; padding: 12px; border-radius: 40px; font-weight: 600; cursor: pointer; }
-        .date-selector {
-            background: var(--primary-soft);
-            padding: 12px;
-            border-radius: 16px;
-            margin-bottom: 16px;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-        }
-        .date-selector input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 12px; font-size: 0.85rem; }
+        .date-selector, .recurrence-config { background: var(--primary-soft); padding: 12px; border-radius: 16px; margin-bottom: 16px; display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+        .date-selector input, .recurrence-config select { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 12px; font-size: 0.85rem; }
         .selected-date-info { background: var(--primary-soft); padding: 12px; border-radius: 16px; margin: 16px 20px 0; text-align: center; font-weight: 600; color: var(--primary); }
         .suggestions-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
         .suggestion-chip { background: var(--primary-soft); padding: 6px 12px; border-radius: 50px; font-size: 0.75rem; cursor: pointer; transition: 0.1s; }
         .suggestion-chip:hover { background: var(--primary-light); }
         .sync-status { text-align: center; font-size: 0.7rem; padding: 6px; color: var(--text-gray); background: #f0f0f0; margin: 0 16px 12px; border-radius: 30px; }
         .sync-status.synced { background: #d1fae5; color: #065f46; }
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .loading-spinner { width: 48px; height: 48px; border: 3px solid white; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
@@ -554,8 +196,31 @@
                 <div class="form-group" id="suggestionsGroup" style="display:none;"><label>📌 Sugestões (mais usadas)</label><div id="suggestionsList" class="suggestions-list"></div></div>
                 <div class="form-group"><label>Valor (R$)</label><input type="number" id="amount" step="0.01" required placeholder="0,00"></div>
                 <div class="form-group"><label>Status</label><select id="status"><option value="pending">⏳ Pendente</option><option value="paid">✅ Pago/Recebido</option></select></div>
-                <div class="form-group"><label>Recorrência</label><select id="recurrence"><option value="none">📅 Apenas este dia</option><option value="weekly">🔄 Repetir semanalmente</option><option value="monthly">📆 Repetir mensalmente</option></select></div>
-                <div class="form-group" id="repeatMonthsGroup" style="display:none;"><label>🔁 Repetir por quantos meses?</label><select id="repeatMonths"><option value="1">1 mês</option><option value="2">2 meses</option><option value="3">3 meses</option><option value="4">4 meses</option><option value="5">5 meses</option><option value="6">6 meses</option><option value="7">7 meses</option><option value="8">8 meses</option><option value="9">9 meses</option><option value="10">10 meses</option><option value="11">11 meses</option><option value="12" selected>12 meses</option></select></div>
+                <div class="form-group"><label>Recorrência</label><select id="recurrence"><option value="none">📅 Apenas este dia</option><option value="weekly">🔄 Semanal (até 12 semanas)</option><option value="monthly">📆 Mensal (até 12 meses)</option></select></div>
+                <!-- Configuração específica para recorrência -->
+                <div id="recurrenceConfig" style="display:none;" class="recurrence-config">
+                    <div id="weeklyConfig" style="display:none;">
+                        <label>🗓️ Dia da semana:</label>
+                        <select id="weeklyDay">
+                            <option value="0">Domingo</option><option value="1">Segunda</option><option value="2">Terça</option><option value="3">Quarta</option><option value="4">Quinta</option><option value="5">Sexta</option><option value="6">Sábado</option>
+                        </select>
+                    </div>
+                    <div id="monthlyConfig" style="display:none;">
+                        <label>📆 Dia do mês (1 a 31):</label>
+                        <input type="number" id="monthlyDay" min="1" max="31" value="1" style="width:80px;">
+                        <label style="margin-top:8px;"><input type="checkbox" id="nextBusinessDay" checked> ⏩ Adiar para próximo dia útil (se cair em fim de semana/feriado)</label>
+                    </div>
+                    <div style="margin-top:12px;">
+                        <label>🔁 Repetir por:</label>
+                        <select id="repeatCount">
+                            <option value="1">1 mês/semana</option>
+                            <option value="2">2 meses/semanas</option>
+                            <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                            <option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option>
+                            <option value="12" selected>12</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="form-buttons"><button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button><button type="submit" class="btn-save">Salvar</button></div>
             </form>
         </div>
@@ -569,7 +234,7 @@
     <div class="modal-content">
         <div class="modal-header"><h3 id="dayModalTitle">Transações do dia</h3><button class="close-modal" onclick="closeDayModal()">Fechar</button></div>
         <div id="dayTransactionsList" class="transactions-list" style="max-height: 400px; overflow-y: auto;"></div>
-        <div style="padding:16px;"><button class="btn-save" onclick="openNewTransaction(selectedDayDate)">➕ Nova transação neste dia</button></div>
+        <div style="padding:16px;"><button class="btn-save" onclick="openNewTransactionFromDay()">➕ Nova transação neste dia</button></div>
     </div>
 </div>
 
@@ -604,6 +269,22 @@
     let editingItemId = null;
     let lastDayModalDate = null;
 
+    // Feriados nacionais em 2026 (exemplo)
+    const feriados2026 = [
+        '2026-01-01', '2026-03-03', '2026-03-04', '2026-04-18', '2026-04-21',
+        '2026-05-01', '2026-06-04', '2026-09-07', '2026-10-12', '2026-11-02',
+        '2026-11-15', '2026-11-20', '2026-12-25'
+    ];
+    function isHoliday(dateStr) { return feriados2026.includes(dateStr); }
+    function isWeekend(date) { const dia = date.getDay(); return dia === 0 || dia === 6; }
+    function adjustToNextBusinessDay(date) {
+        let newDate = new Date(date);
+        while (isWeekend(newDate) || isHoliday(formatDateKey(newDate))) {
+            newDate.setDate(newDate.getDate() + 1);
+        }
+        return newDate;
+    }
+
     // helpers
     function showLoading() { document.getElementById('loadingOverlay').style.display = 'flex'; }
     function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
@@ -622,51 +303,39 @@
     function getMonthStats() { let income=0, expense=0, today=new Date(); for(let d=1;d<=31;d++){ let date=new Date(today.getFullYear(),today.getMonth(),d); if(date.getMonth()!==today.getMonth()) break; getItemsForDate(date).forEach(i=>{ if(i.type==='income') income+=i.amount; if(i.type==='expense') expense+=i.amount; }); } return { income, expense, balance: income-expense }; }
     function getAllTimeBalance() { let total=0; items.forEach(i=>{ if(i.type==='income') total+=i.amount; else if(i.type==='expense') total-=i.amount; }); return total; }
 
-    // previsão e alertas
-    function calculateSpendingPrediction() {
-        const today = new Date();
-        const threeMonthsAgo = new Date(today.setMonth(today.getMonth() - 3));
-        let totalExpense = 0;
-        let months = 0;
-        items.forEach(item => {
-            if (item.type === 'expense' && new Date(item.date) >= threeMonthsAgo) {
-                totalExpense += item.amount;
-                months++;
+    // recorrência com regras
+    function generateRecurringTransactions(baseTransaction, recurrenceType, config, repeatCount) {
+        let newTransactions = [];
+        let currentDate = new Date(baseTransaction.date);
+        let maxIterations = repeatCount;
+        if (recurrenceType === 'monthly') {
+            let targetDay = config.monthlyDay;
+            for (let i = 1; i <= maxIterations; i++) {
+                let nextDate = new Date(currentDate);
+                nextDate.setMonth(currentDate.getMonth() + i);
+                // Ajusta para o dia escolhido
+                let lastDayOfMonth = new Date(nextDate.getFullYear(), nextDate.getMonth()+1, 0).getDate();
+                let finalDay = Math.min(targetDay, lastDayOfMonth);
+                nextDate.setDate(finalDay);
+                // Se não for para adiar, usa a data ajustada
+                if (config.nextBusinessDay) {
+                    let adjusted = adjustToNextBusinessDay(nextDate);
+                    nextDate = adjusted;
+                }
+                if (nextDate > currentDate) {
+                    let copy = { ...baseTransaction, id: Date.now() + i + Math.random(), date: formatDateKey(nextDate), recurrence: 'none' };
+                    newTransactions.push(copy);
+                }
             }
-        });
-        const avgMonthly = months ? totalExpense / 3 : 0;
-        return Math.round(avgMonthly * 1.05);
-    }
-    function checkBudgetAlerts() {
-        const monthIncome = getMonthStats().income;
-        const monthExpense = getMonthStats().expense;
-        if (monthIncome === 0) return '';
-        const percent = (monthExpense / monthIncome) * 100;
-        if (percent >= 100) return '🔴 Alerta crítico! Você gastou mais do que ganhou este mês.';
-        if (percent >= 80) return '🟡 Atenção! Você já gastou 80% da sua receita mensal.';
-        return '';
-    }
-
-    // recorrência
-    function generateRecurringTransactions(baseTransaction, totalMonths) {
-        const newTransactions = [];
-        const startDate = new Date(baseTransaction.date);
-        const maxMonths = parseInt(totalMonths);
-        if (baseTransaction.recurrence === 'monthly') {
-            for (let i = 1; i <= maxMonths; i++) {
-                const newDate = new Date(startDate);
-                newDate.setMonth(startDate.getMonth() + i);
-                if (newDate > new Date(startDate.setMonth(startDate.getMonth() + maxMonths))) break;
-                const copy = { ...baseTransaction, id: Date.now() + i + Math.random(), date: formatDateKey(newDate), recurrence: 'none' };
-                newTransactions.push(copy);
-            }
-        } else if (baseTransaction.recurrence === 'weekly') {
-            const maxWeeks = maxMonths * 4;
-            for (let i = 1; i <= maxWeeks; i++) {
-                const newDate = new Date(startDate);
-                newDate.setDate(startDate.getDate() + (i * 7));
-                if (newDate > new Date(startDate.setMonth(startDate.getMonth() + maxMonths))) break;
-                const copy = { ...baseTransaction, id: Date.now() + i + Math.random(), date: formatDateKey(newDate) };
+        } else if (recurrenceType === 'weekly') {
+            let targetWeekday = config.weeklyDay;
+            for (let i = 1; i <= maxIterations; i++) {
+                let nextDate = new Date(currentDate);
+                nextDate.setDate(currentDate.getDate() + (i * 7));
+                // Ajusta para o dia da semana definido
+                let diff = targetWeekday - nextDate.getDay();
+                if (diff !== 0) nextDate.setDate(nextDate.getDate() + diff);
+                let copy = { ...baseTransaction, id: Date.now() + i + Math.random(), date: formatDateKey(nextDate), recurrence: 'none' };
                 newTransactions.push(copy);
             }
         }
@@ -722,8 +391,11 @@
     function editTransactionFromDay(index) {
         closeDayModal();
         editTransaction(index);
-        // depois de salvar, reabrir o modal do dia
         setTimeout(() => { if(lastDayModalDate) openDayModal(lastDayModalDate); }, 500);
+    }
+    function openNewTransactionFromDay() {
+        closeDayModal();  // FECHA O MODAL DO DIA ANTES DE ABRIR O DE CADASTRO
+        openNewTransaction(selectedDayDate);
     }
 
     function selectDate(date) { selectedDate = date; updateSelectedDateTransactions(); }
@@ -733,8 +405,14 @@
         container.innerHTML='';
         dayItems.forEach(item=>{ let globalIndex=items.findIndex(i=>i.id===item.id); let amountClass=item.type==='expense'?'amount-negative':'amount-positive'; let signal=item.type==='expense'?'-':'+'; let icon=item.type==='expense'?'💸':'💰'; let div=document.createElement('div'); div.className='transaction-item'; div.innerHTML=`<div class="transaction-icon">${icon}</div><div class="transaction-info"><div class="transaction-title">${item.title}</div><div class="transaction-date">${item.time||formatDateDisplay(selectedDate)}</div></div><div class="transaction-amount ${amountClass}">${signal} R$ ${item.amount.toFixed(2)}</div><button class="edit-transaction" onclick="editTransaction(${globalIndex})">✏️</button><button class="delete-transaction" onclick="deleteItem(${globalIndex})">🗑️</button>`; container.appendChild(div); });
     }
-    function editTransaction(index) { const item = items[index]; if(!item) return; editingItemId = item.id; selectedDate = new Date(item.date); document.getElementById('modalTitle').innerHTML = 'Editar transação'; const modalDateInfo = document.getElementById('modalDateInfo'); modalDateInfo.innerHTML = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(selectedDate)}"></div>`; const dateInput = document.getElementById('transactionDate'); if(dateInput) dateInput.addEventListener('change', (e) => { const newDate = new Date(e.target.value); if (!isNaN(newDate.getTime())) selectedDate = newDate; }); document.getElementById('modal').style.display = 'flex'; document.querySelector('[data-tab="financial"]').click(); document.getElementById('type').value = item.type; document.getElementById('description').value = item.title; document.getElementById('amount').value = item.amount; document.getElementById('status').value = item.status || 'pending'; document.getElementById('recurrence').value = item.recurrence || 'none'; if(item.recurrence && item.recurrence !== 'none') document.getElementById('repeatMonthsGroup').style.display = 'block'; else document.getElementById('repeatMonthsGroup').style.display = 'none'; items.splice(index,1); }
-    function openNewTransaction(date, presetType=null) { editingItemId=null; selectedDate=date||new Date(); document.getElementById('modalTitle').innerHTML='Nova transação'; const modalDateInfo=document.getElementById('modalDateInfo'); modalDateInfo.innerHTML=`<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(selectedDate)}"></div>`; const dateInput=document.getElementById('transactionDate'); if(dateInput) dateInput.addEventListener('change',(e)=>{ const newDate=new Date(e.target.value); if(!isNaN(newDate.getTime())) selectedDate=newDate; }); document.getElementById('modal').style.display='flex'; document.getElementById('financialForm').reset(); document.getElementById('repeatMonthsGroup').style.display='none'; if(presetType) document.getElementById('type').value=presetType; // sugestões
+    function editTransaction(index) { const item = items[index]; if(!item) return; editingItemId = item.id; selectedDate = new Date(item.date); document.getElementById('modalTitle').innerHTML = 'Editar transação'; const modalDateInfo = document.getElementById('modalDateInfo'); modalDateInfo.innerHTML = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(selectedDate)}"></div>`; const dateInput = document.getElementById('transactionDate'); if(dateInput) dateInput.addEventListener('change', (e) => { const newDate = new Date(e.target.value); if (!isNaN(newDate.getTime())) selectedDate = newDate; }); document.getElementById('modal').style.display = 'flex'; document.querySelector('[data-tab="financial"]').click(); document.getElementById('type').value = item.type; document.getElementById('description').value = item.title; document.getElementById('amount').value = item.amount; document.getElementById('status').value = item.status || 'pending'; // não suporta edição de recorrência, então ignoramos itens recorrentes na edição. items.splice(index,1); }
+    function openNewTransaction(date, presetType=null) { editingItemId=null; selectedDate=date||new Date(); document.getElementById('modalTitle').innerHTML='Nova transação'; const modalDateInfo=document.getElementById('modalDateInfo'); modalDateInfo.innerHTML=`<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(selectedDate)}"></div>`; const dateInput=document.getElementById('transactionDate'); if(dateInput) dateInput.addEventListener('change',(e)=>{ const newDate=new Date(e.target.value); if(!isNaN(newDate.getTime())) selectedDate=newDate; }); // reset recorrência
+        document.getElementById('recurrence').value = 'none';
+        document.getElementById('recurrenceConfig').style.display = 'none';
+        document.getElementById('weeklyConfig').style.display = 'none';
+        document.getElementById('monthlyConfig').style.display = 'none';
+        document.getElementById('recurrence').dispatchEvent(new Event('change'));
+        document.getElementById('modal').style.display='flex'; document.getElementById('financialForm').reset(); if(presetType) document.getElementById('type').value=presetType;
         const suggestions = getMostUsedDescriptions();
         const suggestionsDiv = document.getElementById('suggestionsGroup');
         const suggestionsList = document.getElementById('suggestionsList');
@@ -753,7 +431,7 @@
         const week = getWeekBalance(new Date());
         const month = getMonthStats();
         const totalGeral = getAllTimeBalance();
-        const prediction = calculateSpendingPrediction();
+        const prediction = Math.round((month.expense / 3) * 1.05);
         const alertMsg = checkBudgetAlerts();
         const content = document.getElementById('reportModalContent');
         content.innerHTML = `
@@ -784,6 +462,7 @@
         `;
         document.getElementById('reportModal').style.display = 'flex';
     }
+    function checkBudgetAlerts() { const monthIncome = getMonthStats().income; const monthExpense = getMonthStats().expense; if (monthIncome===0) return ''; const percent = (monthExpense/monthIncome)*100; if (percent>=100) return '🔴 Alerta crítico! Você gastou mais do que ganhou este mês.'; if (percent>=80) return '🟡 Atenção! Você já gastou 80% da sua receita mensal.'; return ''; }
     function exportToCSV() { if(!items.length) return alert('Nenhuma transação para exportar.'); const headers = ['Data','Tipo','Descrição','Valor','Status']; const rows = items.map(i => [i.date, i.type==='income'?'Receita':'Despesa', i.title, i.amount, i.status]); const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n'); const blob = new Blob([csvContent], {type:'text/csv'}); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `transacoes_${new Date().toISOString().slice(0,10)}.csv`; link.click(); }
     function closeReportModal() { document.getElementById('reportModal').style.display = 'none'; }
     function generateWeeklyReport() { openFullReport(); }
@@ -801,11 +480,28 @@
     async function signup() { const email=document.getElementById('loginEmail').value, password=document.getElementById('loginPassword').value; if(!email){ alert('📧 Digite seu email'); return; } if(password.length<6){ alert('❌ Senha deve ter 6+ caracteres'); return; } showLoading(); try{ await auth.createUserWithEmailAndPassword(email,password); alert('✅ Conta criada! Faça login.'); document.getElementById('loginPassword').value=''; } catch(error){ let msg=''; switch(error.code){ case 'auth/email-already-in-use': msg='❌ Email já cadastrado.'; break; default: msg='❌ Erro: '+error.message; } alert(msg); } finally{ hideLoading(); } }
     async function logout() { showLoading(); try{ await auth.signOut(); } catch(e){ alert(e.message); } finally{ hideLoading(); } }
 
-    // eventos
+    // eventos de recorrência
+    document.getElementById('recurrence').addEventListener('change', (e) => {
+        const val = e.target.value;
+        const configDiv = document.getElementById('recurrenceConfig');
+        const weeklyDiv = document.getElementById('weeklyConfig');
+        const monthlyDiv = document.getElementById('monthlyConfig');
+        if (val === 'none') { configDiv.style.display = 'none'; return; }
+        configDiv.style.display = 'block';
+        if (val === 'weekly') { weeklyDiv.style.display = 'block'; monthlyDiv.style.display = 'none'; }
+        else if (val === 'monthly') { weeklyDiv.style.display = 'none'; monthlyDiv.style.display = 'block'; }
+    });
     document.getElementById('financialForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const recurrence = document.getElementById('recurrence').value;
-        const repeatMonths = parseInt(document.getElementById('repeatMonths').value) || 0;
+        const repeatCount = parseInt(document.getElementById('repeatCount').value);
+        let config = {};
+        if (recurrence === 'weekly') {
+            config.weeklyDay = parseInt(document.getElementById('weeklyDay').value);
+        } else if (recurrence === 'monthly') {
+            config.monthlyDay = parseInt(document.getElementById('monthlyDay').value);
+            config.nextBusinessDay = document.getElementById('nextBusinessDay').checked;
+        }
         const baseTransaction = {
             id: editingItemId || Date.now(),
             type: document.getElementById('type').value,
@@ -815,10 +511,10 @@
             date: formatDateKey(selectedDate),
             recurrence: recurrence
         };
-        if (recurrence !== 'none' && repeatMonths > 0 && repeatMonths <= 12) {
-            const recurring = generateRecurringTransactions(baseTransaction, repeatMonths);
-            items.push(...recurring);
-            alert(`✅ Transação registrada e repetida por ${repeatMonths} meses.`);
+        if (recurrence !== 'none' && repeatCount > 0) {
+            const recurring = generateRecurringTransactions(baseTransaction, recurrence, config, repeatCount);
+            items.push(baseTransaction, ...recurring);
+            alert(`✅ Transação registrada e repetida por ${repeatCount} ${recurrence === 'weekly' ? 'semanas' : 'meses'}.`);
         } else {
             items.push(baseTransaction);
         }
@@ -827,16 +523,14 @@
     });
     document.getElementById('appointmentForm').addEventListener('submit',(e)=>{ e.preventDefault(); items.push({ id:Date.now(), type:'appointment', title:document.getElementById('appointmentTitle').value, time:document.getElementById('appointmentTime').value, location:document.getElementById('appointmentLocation').value, date:formatDateKey(selectedDate) }); saveData(); closeModal(); });
     document.getElementById('noteForm').addEventListener('submit',(e)=>{ e.preventDefault(); items.push({ id:Date.now(), type:'note', title:document.getElementById('noteTitle').value, content:document.getElementById('noteContent').value, date:formatDateKey(selectedDate) }); saveData(); closeModal(); });
-    document.getElementById('recurrence').addEventListener('change', (e) => { document.getElementById('repeatMonthsGroup').style.display = e.target.value !== 'none' ? 'block' : 'none'; });
     document.querySelectorAll('.tab-btn').forEach(btn=>{ btn.addEventListener('click',function(){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); document.getElementById(this.dataset.tab+'Tab').classList.add('active'); }); });
     window.onclick=(e)=>{ if(e.target===document.getElementById('modal')) closeModal(); if(e.target===document.getElementById('dayModal')) closeDayModal(); if(e.target===document.getElementById('reportModal')) closeReportModal(); };
-    // login enter
     document.getElementById('loginEmail').addEventListener('keypress', (e)=>{ if(e.key==='Enter') login(); });
     document.getElementById('loginPassword').addEventListener('keypress', (e)=>{ if(e.key==='Enter') login(); });
 
     auth.onAuthStateChanged(async (user)=>{ if(user){ currentUser=user; document.getElementById('authSection').style.display='none'; document.getElementById('userInfo').style.display='flex'; document.getElementById('userEmail').textContent=user.email; await loadUserData(user.uid); } else { currentUser=null; items=[]; document.getElementById('authSection').style.display='flex'; document.getElementById('userInfo').style.display='none'; document.getElementById('syncStatus').textContent='🔐 Faça login para salvar'; document.getElementById('syncStatus').classList.remove('synced'); refreshAllUI(); } });
 
-    window.login=login; window.signup=signup; window.logout=logout; window.openNewTransaction=openNewTransaction; window.editTransaction=editTransaction; window.closeModal=closeModal; window.deleteItem=deleteItem; window.openFullReport=openFullReport; window.generateWeeklyReport=generateWeeklyReport; window.generateMonthlyReport=generateMonthlyReport; window.generateComparisonReport=generateComparisonReport; window.closeReportModal=closeReportModal; window.prevMonth=prevMonth; window.nextMonth=nextMonth; window.selectDate=selectDate; window.sendTransactionViaWhatsApp=sendTransactionViaWhatsApp; window.sendWeeklyReportToWhatsApp=sendWeeklyReportToWhatsApp; window.closeDayModal=closeDayModal; window.openDayModal=openDayModal; window.deleteItemFromDay=deleteItemFromDay; window.editTransactionFromDay=editTransactionFromDay; window.setDescriptionSuggestion=setDescriptionSuggestion; window.exportToCSV=exportToCSV;
+    window.login=login; window.signup=signup; window.logout=logout; window.openNewTransaction=openNewTransaction; window.editTransaction=editTransaction; window.closeModal=closeModal; window.deleteItem=deleteItem; window.openFullReport=openFullReport; window.generateWeeklyReport=generateWeeklyReport; window.generateMonthlyReport=generateMonthlyReport; window.generateComparisonReport=generateComparisonReport; window.closeReportModal=closeReportModal; window.prevMonth=prevMonth; window.nextMonth=nextMonth; window.selectDate=selectDate; window.sendTransactionViaWhatsApp=sendTransactionViaWhatsApp; window.sendWeeklyReportToWhatsApp=sendWeeklyReportToWhatsApp; window.closeDayModal=closeDayModal; window.openDayModal=openDayModal; window.deleteItemFromDay=deleteItemFromDay; window.editTransactionFromDay=editTransactionFromDay; window.setDescriptionSuggestion=setDescriptionSuggestion; window.exportToCSV=exportToCSV; window.openNewTransactionFromDay=openNewTransactionFromDay;
     selectedDate=new Date(); refreshAllUI(); document.getElementById('selectedDateTitle').innerHTML=formatDateDisplay(selectedDate);
 </script>
 </body>
