@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <title>Dinheiro em Dia 3</title>
+    <title>Dinheiro em Dia login</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -544,11 +544,11 @@
                 <input type="email" id="loginEmail" placeholder="seu@email.com">
                 <input type="password" id="loginPassword" placeholder="senha">
                 <button id="loginBtn">Entrar</button>
-                <button onclick="signup()">Criar</button>
+                <button id="signupBtn">Criar</button>
             </div>
             <div id="userInfo" style="display: none;" class="user-info">
                 <span>👤 <span id="userEmail"></span></span>
-                <button class="logout-btn" onclick="logout()">Sair</button>
+                <button class="logout-btn" id="logoutBtn">Sair</button>
             </div>
         </div>
     </div>
@@ -556,7 +556,7 @@
     <div class="dashboard-grid">
         <div class="left-column">
             <div class="meta-card">
-                <div class="meta-header"><span>🎯 Meta de economia mensal</span><button class="edit-meta-btn" onclick="editMeta()">✏️</button></div>
+                <div class="meta-header"><span>🎯 Meta de economia mensal</span><button class="edit-meta-btn" id="editMetaBtn">✏️</button></div>
                 <div class="meta-value" id="metaValueDisplay">R$ 0,00</div>
                 <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
                 <div class="meta-status" id="metaStatus">Defina uma meta para começar</div>
@@ -574,16 +574,16 @@
                 </div>
             </div>
             <div class="shortcuts">
-                <div class="shortcut-item" onclick="openNewTransaction(new Date(), 'income')">💰 Receita</div>
-                <div class="shortcut-item" onclick="openNewTransaction(new Date(), 'expense')">💸 Despesa</div>
-                <div class="shortcut-item" onclick="openFullReport()">📊 Resumo Geral</div>
-                <div class="shortcut-item" onclick="generateWeeklyReport()">📅 Semana</div>
-                <div class="shortcut-item" onclick="generateMonthlyReport()">📆 Mês</div>
+                <div class="shortcut-item" data-action="income">💰 Receita</div>
+                <div class="shortcut-item" data-action="expense">💸 Despesa</div>
+                <div class="shortcut-item" data-action="fullReport">📊 Resumo Geral</div>
+                <div class="shortcut-item" data-action="weekReport">📅 Semana</div>
+                <div class="shortcut-item" data-action="monthReport">📆 Mês</div>
             </div>
             <div class="section-header"><span>📅 Esta semana</span><span id="currentMonthLabel" style="font-size:0.7rem; color:var(--primary);"></span></div>
             <div class="week-scroll"><div class="week-days" id="weekDaysContainer"></div></div>
             <div class="month-card">
-                <div class="month-header"><button class="month-nav" onclick="prevMonth()">◀</button><span id="monthTitle" style="font-weight:700;">Maio 2026</span><button class="month-nav" onclick="nextMonth()">▶</button></div>
+                <div class="month-header"><button class="month-nav" id="prevMonthBtn">◀</button><span id="monthTitle" style="font-weight:700;">Maio 2026</span><button class="month-nav" id="nextMonthBtn">▶</button></div>
                 <div class="month-grid" id="monthGrid"></div>
             </div>
         </div>
@@ -593,16 +593,16 @@
                 <div class="summary-item"><div class="summary-label">🟢 Receitas</div><div class="summary-value" id="totalIncome">R$ 0</div></div>
                 <div class="summary-item"><div class="summary-label">💰 Saldo</div><div class="summary-value" id="totalBalance">R$ 0</div></div>
             </div>
-            <button class="desktop-fab" onclick="openNewTransaction(new Date())">➕ Nova transação</button>
+            <button class="desktop-fab" id="desktopFabBtn">➕ Nova transação</button>
         </div>
     </div>
 </div>
-<button class="fab" onclick="openNewTransaction(new Date())">+</button>
+<button class="fab" id="fabBtn">+</button>
 
 <!-- Modal de Transação (criar/editar) -->
 <div id="modal" class="modal">
     <div class="modal-content">
-        <div class="modal-header"><h3 id="modalTitle">Nova transação</h3><button class="close-modal" onclick="closeModal()">Fechar</button></div>
+        <div class="modal-header"><h3 id="modalTitle">Nova transação</h3><button class="close-modal" id="closeModalBtn">Fechar</button></div>
         <div id="modalDateInfo" class="selected-date-info"></div>
         <div class="modal-tabs">
             <button class="tab-btn active" data-tab="financial">💰 Financeiro</button>
@@ -615,7 +615,7 @@
                 <div class="form-group"><label>Descrição</label><input type="text" id="description" list="descSuggestions" required placeholder="Ex: Almoço, Salário"><datalist id="descSuggestions"></datalist></div>
                 <div class="form-group"><label>Valor (R$)</label><input type="number" id="amount" step="0.01" required placeholder="0,00"></div>
                 <div class="form-group"><label>Status</label><select id="status"><option value="pending">⏳ Pendente</option><option value="paid">✅ Pago/Recebido</option></select></div>
-                <div class="form-buttons"><button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button><button type="submit" class="btn-save">Salvar</button></div>
+                <div class="form-buttons"><button type="button" class="btn-cancel" id="cancelModalBtn">Cancelar</button><button type="submit" class="btn-save">Salvar</button></div>
             </form>
         </div>
         <div id="appointmentTab" class="tab-content">
@@ -623,14 +623,14 @@
                 <div class="form-group"><label>Título</label><input type="text" id="appointmentTitle" required></div>
                 <div class="form-group"><label>Horário</label><input type="time" id="appointmentTime"></div>
                 <div class="form-group"><label>Local</label><input type="text" id="appointmentLocation"></div>
-                <div class="form-buttons"><button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button><button type="submit" class="btn-save">Salvar</button></div>
+                <div class="form-buttons"><button type="button" class="btn-cancel" id="cancelAppointmentBtn">Cancelar</button><button type="submit" class="btn-save">Salvar</button></div>
             </form>
         </div>
         <div id="noteTab" class="tab-content">
             <form id="noteForm">
                 <div class="form-group"><label>Título</label><input type="text" id="noteTitle" required></div>
                 <div class="form-group"><label>Conteúdo</label><textarea id="noteContent" rows="4"></textarea></div>
-                <div class="form-buttons"><button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button><button type="submit" class="btn-save">Salvar</button></div>
+                <div class="form-buttons"><button type="button" class="btn-cancel" id="cancelNoteBtn">Cancelar</button><button type="submit" class="btn-save">Salvar</button></div>
             </form>
         </div>
     </div>
@@ -641,11 +641,11 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3 id="dayModalTitle">Detalhes do dia</h3>
-            <button class="close-modal" onclick="closeDayModal()">Fechar</button>
+            <button class="close-modal" id="closeDayModalBtn">Fechar</button>
         </div>
         <div id="dayModalContent" style="padding: 0 0 20px 0;"></div>
         <div style="padding: 0 20px 20px;">
-            <button class="btn-save" onclick="openNewTransactionFromModal()">+ Adicionar transação</button>
+            <button class="btn-save" id="addTransactionFromDayBtn">+ Adicionar transação</button>
         </div>
     </div>
 </div>
@@ -655,7 +655,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3>💡 Insights do momento</h3>
-            <button class="close-modal" onclick="closeInsightsModal()">Fechar</button>
+            <button class="close-modal" id="closeInsightsModalBtn">Fechar</button>
         </div>
         <div id="insightsModalContent" class="insight-modal-content" style="padding: 20px;"></div>
     </div>
@@ -664,7 +664,7 @@
 <!-- Modal de Relatório -->
 <div id="reportModal" class="report-modal">
     <div class="report-modal-content" style="max-width:500px;">
-        <div class="report-modal-header"><h3>📊 Relatório</h3><button class="close-report-modal" onclick="closeReportModal()">Fechar</button></div>
+        <div class="report-modal-header"><h3>📊 Relatório</h3><button class="close-report-modal" id="closeReportModalBtn">Fechar</button></div>
         <div id="reportModalContent"></div>
     </div>
 </div>
@@ -672,8 +672,8 @@
 <!-- Modal Meta -->
 <div id="metaModal" class="modal">
     <div class="modal-content" style="max-width:300px;">
-        <div class="modal-header"><h3>Definir meta mensal</h3><button class="close-modal" onclick="closeMetaModal()">Fechar</button></div>
-        <div style="padding:20px;"><label>Valor da meta (R$)</label><input type="number" id="metaAmountInput" step="100" placeholder="Ex: 2000" style="width:100%; margin-top:8px;"><button onclick="saveMeta()" class="btn-save" style="margin-top:16px;">Salvar meta</button></div>
+        <div class="modal-header"><h3>Definir meta mensal</h3><button class="close-modal" id="closeMetaModalBtn">Fechar</button></div>
+        <div style="padding:20px;"><label>Valor da meta (R$)</label><input type="number" id="metaAmountInput" step="100" placeholder="Ex: 2000" style="width:100%; margin-top:8px;"><button id="saveMetaBtn" class="btn-save" style="margin-top:16px;">Salvar meta</button></div>
     </div>
 </div>
 
@@ -728,18 +728,25 @@
     }
     async function loadUserData(uid) { 
         showLoading(); 
-        const snapItems = await db.ref(`users/${uid}/items`).once('value'); 
-        items = snapItems.val() || []; 
-        if(!Array.isArray(items)) items = []; 
-        const snapSettings = await db.ref(`users/${uid}/settings`).once('value'); 
-        const settings = snapSettings.val(); 
-        if(settings) { userSettings = settings; if(userSettings.meta === undefined) userSettings.meta = 0; } 
-        else { userSettings = { meta: 0 }; } 
-        updateDescriptionDatalist(); 
-        updateMetaUI(); 
-        document.getElementById('syncStatus').textContent = `✅ ${items.length} itens carregados`; 
-        document.getElementById('syncStatus').classList.add('synced'); 
-        refreshAllUI(); hideLoading(); 
+        try {
+            const snapItems = await db.ref(`users/${uid}/items`).once('value'); 
+            items = snapItems.val() || []; 
+            if(!Array.isArray(items)) items = []; 
+            const snapSettings = await db.ref(`users/${uid}/settings`).once('value'); 
+            const settings = snapSettings.val(); 
+            if(settings) { userSettings = settings; if(userSettings.meta === undefined) userSettings.meta = 0; } 
+            else { userSettings = { meta: 0 }; } 
+            updateDescriptionDatalist(); 
+            updateMetaUI(); 
+            document.getElementById('syncStatus').textContent = `✅ ${items.length} itens carregados`; 
+            document.getElementById('syncStatus').classList.add('synced'); 
+            refreshAllUI(); 
+        } catch (error) {
+            console.error("Erro ao carregar dados:", error);
+            document.getElementById('syncStatus').textContent = '⚠️ Erro ao carregar dados';
+        } finally {
+            hideLoading();
+        }
     }
 
     // ========== AUTOCOMPLETE + SUGESTÃO DE VALOR ==========
@@ -925,7 +932,9 @@
     }
 
     // ========== MODAL DO DIA ==========
+    let currentModalDate = null;
     function showDayModal(date) {
+        currentModalDate = date;
         document.getElementById('dayModalTitle').innerHTML = formatDateDisplay(date);
         const container = document.getElementById('dayModalContent');
         container.innerHTML = '';
@@ -952,9 +961,9 @@
                     </div>
                     <div class="day-modal-amount ${amountClass}">${signal} R$ ${item.amount.toFixed(2)}</div>
                     <div class="day-modal-actions">
-                        <button onclick="editTransaction(${globalIndex})">✏️</button>
-                        <button onclick="deleteItem(${globalIndex})">🗑️</button>
-                        <button onclick="repeatTransaction(${globalIndex})">↻</button>
+                        <button class="edit-transaction-btn" data-index="${globalIndex}">✏️</button>
+                        <button class="delete-transaction-btn" data-index="${globalIndex}">🗑️</button>
+                        <button class="repeat-transaction-btn" data-index="${globalIndex}">↻</button>
                     </div>
                 `;
                 finDiv.appendChild(div);
@@ -980,7 +989,7 @@
                         <div class="day-modal-detail">${app.time ? `🕒 ${app.time}` : ''} ${app.location ? `📍 ${app.location}` : ''}</div>
                     </div>
                     <div class="day-modal-actions">
-                        <button onclick="deleteItem(${index})">🗑️</button>
+                        <button class="delete-appointment-btn" data-index="${index}">🗑️</button>
                     </div>
                 `;
                 appDiv.appendChild(div);
@@ -1006,7 +1015,7 @@
                         <div class="day-modal-detail">${note.content ? escapeHtml(note.content.substring(0,100)) : ''}</div>
                     </div>
                     <div class="day-modal-actions">
-                        <button onclick="deleteItem(${index})">🗑️</button>
+                        <button class="delete-note-btn" data-index="${index}">🗑️</button>
                     </div>
                 `;
                 notesDiv.appendChild(div);
@@ -1014,22 +1023,22 @@
         }
         container.appendChild(notesDiv);
         
+        // Adicionar listeners para os botões dinâmicos
+        container.querySelectorAll('.edit-transaction-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => { editTransaction(parseInt(btn.dataset.index)); closeDayModal(); });
+        });
+        container.querySelectorAll('.delete-transaction-btn, .delete-appointment-btn, .delete-note-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => { deleteItem(parseInt(btn.dataset.index)); closeDayModal(); });
+        });
+        container.querySelectorAll('.repeat-transaction-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => { repeatTransaction(parseInt(btn.dataset.index)); closeDayModal(); });
+        });
+        
         document.getElementById('dayModal').style.display = 'flex';
     }
-    function closeDayModal() { document.getElementById('dayModal').style.display = 'none'; }
+    function closeDayModal() { document.getElementById('dayModal').style.display = 'none'; currentModalDate = null; }
     function openNewTransactionFromModal() { 
-        // pegar a data que está no título do modal (dia clicado)
-        const dateStr = document.getElementById('dayModalTitle').innerHTML;
-        // tentar extrair a data do texto; fallback: data atual
-        let date = new Date();
-        const match = dateStr.match(/\d{1,2} de \w+ de \d{4}/);
-        if(match) {
-            const partes = match[0].split(' de ');
-            const meses = { 'janeiro':0,'fevereiro':1,'março':2,'abril':3,'maio':4,'junho':5,'julho':6,'agosto':7,'setembro':8,'outubro':9,'novembro':10,'dezembro':11 };
-            const mes = meses[partes[1].toLowerCase()];
-            if(mes !== undefined) date = new Date(parseInt(partes[2]), mes, parseInt(partes[0]));
-        }
-        openNewTransaction(date); 
+        if(currentModalDate) openNewTransaction(currentModalDate); 
         closeDayModal(); 
     }
     
@@ -1037,7 +1046,6 @@
         const original = items[index];
         if (!original) return;
         editingItemId = null;
-        // Abrir modal com data atual
         const today = new Date();
         openModalWithDate(today, 'financial');
         document.getElementById('type').value = original.type;
@@ -1076,14 +1084,6 @@
         } else if (tab === 'note') {
             document.querySelector('.tab-btn[data-tab="note"]').classList.add('active');
             document.getElementById('noteTab').classList.add('active');
-        }
-        // reaplicar o listener de mudança de data
-        const dateInput = document.getElementById('transactionDate');
-        if (dateInput) {
-            dateInput.onchange = function(e) {
-                // apenas armazena, será usado no submit
-                console.log('Data alterada para:', e.target.value);
-            };
         }
     }
     
@@ -1161,20 +1161,73 @@
     function prevMonth() { currentMonth.setMonth(currentMonth.getMonth()-1); renderMonthCalendar(); }
     function nextMonth() { currentMonth.setMonth(currentMonth.getMonth()+1); renderMonthCalendar(); }
 
-    // ========== AUTENTICAÇÃO ==========
+    // ========== AUTENTICAÇÃO CORRIGIDA ==========
     async function login() { 
-        const email=document.getElementById('loginEmail').value, password=document.getElementById('loginPassword').value; 
-        if(!email||!password){ alert('📧 Preencha email e senha'); return; } showLoading(); 
-        try{ await auth.signInWithEmailAndPassword(email,password); alert('✅ Login realizado!'); } catch(error){ alert('❌ Erro: '+error.message); } finally{ hideLoading(); } 
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        if(!email || !password){ 
+            alert('📧 Preencha email e senha'); 
+            return; 
+        }
+        showLoading(); 
+        try{ 
+            await auth.signInWithEmailAndPassword(email,password); 
+            alert('✅ Login realizado!'); 
+            // Limpa os campos
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        } catch(error){ 
+            let msg = '';
+            switch(error.code){
+                case 'auth/user-not-found': msg = '❌ Usuário não encontrado. Crie uma conta.'; break;
+                case 'auth/wrong-password': msg = '❌ Senha incorreta.'; break;
+                case 'auth/invalid-email': msg = '❌ Email inválido.'; break;
+                default: msg = '❌ Erro: ' + error.message;
+            }
+            alert(msg);
+        } finally{ 
+            hideLoading(); 
+        } 
     }
+    
     async function signup() { 
-        const email=document.getElementById('loginEmail').value, password=document.getElementById('loginPassword').value; 
-        if(!email){ alert('📧 Digite seu email'); return; } if(password.length<6){ alert('❌ Senha deve ter 6+ caracteres'); return; } showLoading(); 
-        try{ await auth.createUserWithEmailAndPassword(email,password); alert('✅ Conta criada! Faça login.'); document.getElementById('loginPassword').value=''; } catch(error){ alert('❌ Erro: '+error.message); } finally{ hideLoading(); } 
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        if(!email){ 
+            alert('📧 Digite seu email'); 
+            return; 
+        }
+        if(password.length < 6){ 
+            alert('❌ Senha deve ter pelo menos 6 caracteres'); 
+            return; 
+        }
+        showLoading(); 
+        try{ 
+            await auth.createUserWithEmailAndPassword(email,password); 
+            alert('✅ Conta criada! Agora faça login com os mesmos dados.'); 
+            document.getElementById('loginPassword').value = ''; 
+        } catch(error){ 
+            let msg = '';
+            if(error.code === 'auth/email-already-in-use') msg = '❌ Email já cadastrado. Faça login.';
+            else msg = '❌ Erro: ' + error.message;
+            alert(msg);
+        } finally{ 
+            hideLoading(); 
+        } 
     }
-    async function logout() { showLoading(); try{ await auth.signOut(); } catch(e){ alert(e.message); } finally{ hideLoading(); } }
+    
+    async function logout() { 
+        showLoading(); 
+        try{ 
+            await auth.signOut(); 
+        } catch(e){ 
+            alert(e.message); 
+        } finally{ 
+            hideLoading(); 
+        } 
+    }
 
-    // ========== SUBMITS (corrigidos com data do campo) ==========
+    // ========== SUBMITS ==========
     document.getElementById('financialForm').addEventListener('submit',(e)=>{ 
         e.preventDefault(); 
         const selectedDate = getSelectedDateFromModal();
@@ -1236,14 +1289,38 @@
         }); 
     });
     
-    window.onclick=(e)=>{ 
-        if(e.target===document.getElementById('modal')) closeModal(); 
-        if(e.target===document.getElementById('reportModal')) closeReportModal(); 
-        if(e.target===document.getElementById('metaModal')) closeMetaModal(); 
-        if(e.target===document.getElementById('dayModal')) closeDayModal(); 
-        if(e.target===document.getElementById('insightsModal')) closeInsightsModal(); 
-    };
-
+    // Fechar modais com botões específicos
+    document.getElementById('closeModalBtn')?.addEventListener('click', closeModal);
+    document.getElementById('cancelModalBtn')?.addEventListener('click', closeModal);
+    document.getElementById('cancelAppointmentBtn')?.addEventListener('click', closeModal);
+    document.getElementById('cancelNoteBtn')?.addEventListener('click', closeModal);
+    document.getElementById('closeDayModalBtn')?.addEventListener('click', closeDayModal);
+    document.getElementById('closeInsightsModalBtn')?.addEventListener('click', closeInsightsModal);
+    document.getElementById('closeReportModalBtn')?.addEventListener('click', closeReportModal);
+    document.getElementById('closeMetaModalBtn')?.addEventListener('click', closeMetaModal);
+    document.getElementById('saveMetaBtn')?.addEventListener('click', saveMeta);
+    document.getElementById('editMetaBtn')?.addEventListener('click', editMeta);
+    document.getElementById('addTransactionFromDayBtn')?.addEventListener('click', openNewTransactionFromModal);
+    
+    // Navegação mês
+    document.getElementById('prevMonthBtn')?.addEventListener('click', prevMonth);
+    document.getElementById('nextMonthBtn')?.addEventListener('click', nextMonth);
+    
+    // Atalhos
+    document.querySelectorAll('.shortcut-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const action = item.dataset.action;
+            if (action === 'income') openNewTransaction(new Date(), 'income');
+            else if (action === 'expense') openNewTransaction(new Date(), 'expense');
+            else if (action === 'fullReport') openFullReport();
+            else if (action === 'weekReport') generateWeeklyReport();
+            else if (action === 'monthReport') generateMonthlyReport();
+        });
+    });
+    
+    document.getElementById('desktopFabBtn')?.addEventListener('click', () => openNewTransaction(new Date()));
+    document.getElementById('fabBtn')?.addEventListener('click', () => openNewTransaction(new Date()));
+    
     // Modo escuro
     const darkModeToggle = document.getElementById('darkModeToggle');
     if(darkModeToggle) {
@@ -1262,38 +1339,48 @@
     }
     
     // Lâmpada insights
-    const lamp = document.getElementById('insightsLamp');
-    if(lamp) lamp.addEventListener('click', showInsightsModal);
+    document.getElementById('insightsLamp')?.addEventListener('click', showInsightsModal);
     
     // Login com Enter
-    const loginEmail = document.getElementById('loginEmail'), loginPassword = document.getElementById('loginPassword'), loginBtn = document.getElementById('loginBtn');
+    const loginEmailField = document.getElementById('loginEmail');
+    const loginPasswordField = document.getElementById('loginPassword');
     function handleLoginEnter(e) { if(e.key === 'Enter') login(); }
-    if(loginEmail) loginEmail.addEventListener('keypress', handleLoginEnter);
-    if(loginPassword) loginPassword.addEventListener('keypress', handleLoginEnter);
-    if(loginBtn) loginBtn.onclick = login;
+    if(loginEmailField) loginEmailField.addEventListener('keypress', handleLoginEnter);
+    if(loginPasswordField) loginPasswordField.addEventListener('keypress', handleLoginEnter);
     
-    // Expor funções globais para os botões inline
-    window.login = login;
-    window.signup = signup;
-    window.logout = logout;
-    window.openNewTransaction = openNewTransaction;
-    window.editTransaction = editTransaction;
-    window.closeModal = closeModal;
-    window.deleteItem = deleteItem;
-    window.openFullReport = openFullReport;
-    window.generateWeeklyReport = generateWeeklyReport;
-    window.generateMonthlyReport = generateMonthlyReport;
-    window.closeReportModal = closeReportModal;
-    window.prevMonth = prevMonth;
-    window.nextMonth = nextMonth;
-    window.showDayModal = showDayModal;
-    window.closeDayModal = closeDayModal;
-    window.repeatTransaction = repeatTransaction;
-    window.openNewTransactionFromModal = openNewTransactionFromModal;
-    window.editMeta = editMeta;
-    window.saveMeta = saveMeta;
-    window.closeMetaModal = closeMetaModal;
-    window.closeInsightsModal = closeInsightsModal;
+    // Botões de login e cadastro
+    document.getElementById('loginBtn')?.addEventListener('click', login);
+    document.getElementById('signupBtn')?.addEventListener('click', signup);
+    document.getElementById('logoutBtn')?.addEventListener('click', logout);
+    
+    // Fechar modais clicando fora
+    window.onclick = (e) => {
+        if(e.target === document.getElementById('modal')) closeModal();
+        if(e.target === document.getElementById('reportModal')) closeReportModal();
+        if(e.target === document.getElementById('metaModal')) closeMetaModal();
+        if(e.target === document.getElementById('dayModal')) closeDayModal();
+        if(e.target === document.getElementById('insightsModal')) closeInsightsModal();
+    };
+    
+    // Observador de autenticação
+    auth.onAuthStateChanged(async (user) => { 
+        if(user){ 
+            currentUser = user; 
+            document.getElementById('authSection').style.display = 'none'; 
+            document.getElementById('userInfo').style.display = 'flex'; 
+            document.getElementById('userEmail').textContent = user.email; 
+            await loadUserData(user.uid); 
+        } else { 
+            currentUser = null; 
+            items = []; 
+            userSettings = { meta: 0 }; 
+            document.getElementById('authSection').style.display = 'flex'; 
+            document.getElementById('userInfo').style.display = 'none'; 
+            document.getElementById('syncStatus').textContent = '🔐 Faça login para salvar'; 
+            document.getElementById('syncStatus').classList.remove('synced'); 
+            refreshAllUI(); 
+        } 
+    });
     
     // Inicialização
     refreshAllUI();
