@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <title>Dinheiro em Dia • 2</title>
+    <title>Dinheiro em Dia • Banco Digital</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -55,11 +55,33 @@
         }
         .logo h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
         .logo p { font-size: 0.7rem; opacity: 0.85; margin-top: 4px; }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .insights-lamp {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .insights-lamp:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
         .auth-section {
             display: flex;
             gap: 8px;
-            margin-top: 12px;
             flex-wrap: wrap;
+            flex: 1;
         }
         .auth-section input {
             background: rgba(255,255,255,0.2);
@@ -85,11 +107,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 12px;
             background: rgba(255,255,255,0.15);
-            padding: 10px 16px;
+            padding: 8px 16px;
             border-radius: 40px;
-            flex-wrap: wrap;
             gap: 10px;
         }
         .logout-btn {
@@ -257,16 +277,18 @@
         }
         .summary-label { font-size: 0.65rem; color: var(--text-gray); }
         .summary-value { font-weight: 800; font-size: 0.9rem; }
-        .insights-card {
-            background: var(--card-bg);
+        .desktop-fab {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
             margin: 0 16px 20px;
-            border-radius: 24px;
-            padding: 16px;
+            width: calc(100% - 32px);
         }
-        @media (min-width: 900px) { .insights-card { margin: 0 0 20px 0; } }
-        .insights-header { font-weight: 700; margin-bottom: 12px; color: var(--primary); font-size: 0.9rem; }
-        .insights-content { font-size: 0.8rem; line-height: 1.4; color: var(--text-gray); }
-        .insight-item { margin-bottom: 8px; padding: 8px; background: var(--primary-soft); border-radius: 16px; }
+        @media (min-width: 900px) { .desktop-fab { margin: 0 0 20px 0; width: 100%; } }
         .fab {
             position: fixed;
             bottom: 20px;
@@ -285,18 +307,6 @@
             border: none;
             z-index: 100;
         }
-        .desktop-fab {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            margin: 0 16px 20px;
-            width: calc(100% - 32px);
-        }
-        @media (min-width: 900px) { .desktop-fab { margin: 0 0 20px 0; width: 100%; } }
         .modal, .report-modal {
             display: none;
             position: fixed;
@@ -451,7 +461,7 @@
             cursor: pointer;
             font-size: 0.75rem;
         }
-        /* Modo escuro - textos claros */
+        /* Modo escuro */
         body.dark-mode {
             --primary: #a78bfa;
             --primary-dark: #8b5cf6;
@@ -468,13 +478,12 @@
         body.dark-mode .month-day { background: #374151; color: #f9fafb; }
         body.dark-mode .month-day.today { background: #4c1d95; color: white; }
         body.dark-mode .day-chip { background: #1f2937; color: #f9fafb; }
-        body.dark-mode .transaction-item, body.dark-mode .non-financial-item { border-bottom-color: #374151; }
+        body.dark-mode .transaction-item, body.dark-mode .day-modal-item { border-bottom-color: #374151; }
         body.dark-mode .modal-content, body.dark-mode .report-modal-content { background: #1f2937; color: #f9fafb; }
         body.dark-mode .close-modal, body.dark-mode .close-report-modal { background: #374151; color: white; }
         body.dark-mode .form-group input, body.dark-mode .form-group select, body.dark-mode .form-group textarea { background: #374151; border-color: #4b5563; color: white; }
         body.dark-mode .btn-cancel { background: #374151; color: white; }
         body.dark-mode .summary-item { background: #374151; }
-        body.dark-mode .insight-item { background: #374151; }
         body.dark-mode .date-selector { background: #374151; }
         body.dark-mode .selected-date-info { background: #374151; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -482,7 +491,6 @@
         .week-scroll::-webkit-scrollbar { height: 4px; }
         .week-scroll::-webkit-scrollbar-track { background: var(--border); border-radius: 10px; }
         .week-scroll::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
-        /* Estilos do modal de dia */
         .day-modal-item {
             display: flex;
             align-items: center;
@@ -516,6 +524,15 @@
             cursor: pointer;
             padding: 0 6px;
         }
+        .insight-modal-content {
+            line-height: 1.5;
+        }
+        .insight-item {
+            margin-bottom: 12px;
+            padding: 10px;
+            background: var(--primary-soft);
+            border-radius: 16px;
+        }
     </style>
 </head>
 <body>
@@ -523,8 +540,9 @@
 <div class="app-container">
     <div class="header">
         <div class="logo"><h1>💰 dinheiro em dia</h1><p>conta digital</p></div>
-        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <div class="header-actions">
             <button id="darkModeToggle" class="dark-mode-toggle">🌙 Modo escuro</button>
+            <button id="insightsLamp" class="insights-lamp" title="Ver dicas e insights">💡</button>
             <div id="authSection" class="auth-section">
                 <input type="email" id="loginEmail" placeholder="seu@email.com">
                 <input type="password" id="loginPassword" placeholder="senha">
@@ -578,10 +596,6 @@
                 <div class="summary-item"><div class="summary-label">🟢 Receitas</div><div class="summary-value" id="totalIncome">R$ 0</div></div>
                 <div class="summary-item"><div class="summary-label">💰 Saldo</div><div class="summary-value" id="totalBalance">R$ 0</div></div>
             </div>
-            <div class="insights-card">
-                <div class="insights-header">💡 Insights do momento</div>
-                <div id="insightsContent" class="insights-content">Carregando...</div>
-            </div>
             <button class="desktop-fab" onclick="openNewTransaction(new Date())">➕ Nova transação</button>
         </div>
     </div>
@@ -625,7 +639,7 @@
     </div>
 </div>
 
-<!-- Modal de Detalhe do Dia (substitui a listagem da coluna direita) -->
+<!-- Modal de Detalhe do Dia -->
 <div id="dayModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -636,6 +650,17 @@
         <div style="padding: 0 20px 20px;">
             <button class="btn-save" onclick="openNewTransactionFromModal()">+ Adicionar transação</button>
         </div>
+    </div>
+</div>
+
+<!-- Modal de Insights (lâmpada) -->
+<div id="insightsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>💡 Insights do momento</h3>
+            <button class="close-modal" onclick="closeInsightsModal()">Fechar</button>
+        </div>
+        <div id="insightsModalContent" class="insight-modal-content" style="padding: 20px;"></div>
     </div>
 </div>
 
@@ -673,7 +698,7 @@
     // ========== VARIÁVEIS GLOBAIS ==========
     let currentUser = null;
     let items = [];
-    let selectedDateForModal = null; // data selecionada para o modal de detalhe
+    let selectedDateForModal = null;
     let currentMonth = new Date();
     let editingItemId = null;
     let userSettings = { meta: 0 };
@@ -716,22 +741,19 @@
         datalist.innerHTML = '';
         getDescriptionSuggestions().forEach(desc => { const opt = document.createElement('option'); opt.value = desc; datalist.appendChild(opt); });
     }
-    // Sugerir valor baseado na descrição (moda)
     function suggestAmountByDescription(desc) {
         if(!desc) return;
         const matches = items.filter(i => (i.type === 'income' || i.type === 'expense') && i.title === desc);
         if(matches.length === 0) return;
-        // calcular moda (valor mais frequente)
         const freq = new Map();
         matches.forEach(m => freq.set(m.amount, (freq.get(m.amount)||0)+1));
         let mostFrequentAmount = null, maxCount = 0;
         for(let [amt, count] of freq.entries()) {
             if(count > maxCount) { maxCount = count; mostFrequentAmount = amt; }
         }
-        if(mostFrequentAmount !== null) {
-            document.getElementById('amount').value = mostFrequentAmount;
-        }
+        if(mostFrequentAmount !== null) document.getElementById('amount').value = mostFrequentAmount;
     }
+
     // ========== META ==========
     function updateMetaUI() {
         const meta = userSettings.meta || 0;
@@ -764,8 +786,8 @@
     function getWeekBalance(date) { let income=0, expense=0, start=new Date(date); start.setDate(date.getDate()-date.getDay()); for(let i=0;i<7;i++){ let d=new Date(start); d.setDate(start.getDate()+i); getFinancialItemsForDate(d).forEach(i=>{ if(i.type==='income') income+=i.amount; if(i.type==='expense') expense+=i.amount; }); } return { balance: income-expense, income, expense }; }
     function getMonthStats() { let income=0, expense=0, today=new Date(); for(let d=1;d<=31;d++){ let date=new Date(today.getFullYear(),today.getMonth(),d); if(date.getMonth()!==today.getMonth()) break; getFinancialItemsForDate(date).forEach(i=>{ if(i.type==='income') income+=i.amount; if(i.type==='expense') expense+=i.amount; }); } return { income, expense, balance: income-expense }; }
 
-    // ========== INSIGHTS ==========
-    function generateInsights() {
+    // ========== INSIGHTS (gerar conteúdo para modal) ==========
+    function generateInsightsHTML() {
         const monthStats = getMonthStats();
         const weekStats = getWeekBalance(new Date());
         const pendingTransactions = items.filter(i => (i.type === 'income' || i.type === 'expense') && i.status === 'pending').length;
@@ -779,8 +801,13 @@
         if (highExpenses > 3) insights.push(`💸 Você fez ${highExpenses} despesas acima de R$200 este mês.`);
         if (items.length === 0) insights.push('👋 Comece adicionando suas receitas e despesas.');
         if (insights.length === 0) insights.push('✅ Tudo em ordem! Continue gerenciando suas finanças.');
-        document.getElementById('insightsContent').innerHTML = insights.map(ins => `<div class="insight-item">${ins}</div>`).join('');
+        return insights.map(ins => `<div class="insight-item">${ins}</div>`).join('');
     }
+    function showInsightsModal() {
+        document.getElementById('insightsModalContent').innerHTML = generateInsightsHTML();
+        document.getElementById('insightsModal').style.display = 'flex';
+    }
+    function closeInsightsModal() { document.getElementById('insightsModal').style.display = 'none'; }
 
     // ========== RENDERIZAÇÃO ==========
     function renderWeekCalendar() {
@@ -814,14 +841,13 @@
         }
     }
 
-    // ========== MODAL DO DIA (substitui a listagem anterior) ==========
+    // ========== MODAL DO DIA ==========
     function showDayModal(date) {
         selectedDateForModal = date;
         document.getElementById('dayModalTitle').innerHTML = formatDateDisplay(date);
         const container = document.getElementById('dayModalContent');
         container.innerHTML = '';
         
-        // Seção Financeiro
         const financialItems = getFinancialItemsForDate(date);
         const finDiv = document.createElement('div');
         finDiv.className = 'detail-section';
@@ -854,7 +880,6 @@
         }
         container.appendChild(finDiv);
         
-        // Seção Compromissos
         const appointments = getAppointmentsForDate(date);
         const appDiv = document.createElement('div');
         appDiv.className = 'detail-section';
@@ -881,7 +906,6 @@
         }
         container.appendChild(appDiv);
         
-        // Seção Anotações
         const notes = getNotesForDate(date);
         const notesDiv = document.createElement('div');
         notesDiv.className = 'detail-section';
@@ -910,16 +934,8 @@
         
         document.getElementById('dayModal').style.display = 'flex';
     }
-    function closeDayModal() {
-        document.getElementById('dayModal').style.display = 'none';
-        selectedDateForModal = null;
-    }
-    function openNewTransactionFromModal() {
-        if(selectedDateForModal) {
-            openNewTransaction(selectedDateForModal);
-            closeDayModal();
-        }
-    }
+    function closeDayModal() { document.getElementById('dayModal').style.display = 'none'; selectedDateForModal = null; }
+    function openNewTransactionFromModal() { if(selectedDateForModal) { openNewTransaction(selectedDateForModal); closeDayModal(); } }
     
     function repeatTransaction(index) {
         const original = items[index];
@@ -967,9 +983,7 @@
         document.getElementById('modal').style.display = 'flex';
         document.getElementById('financialForm').reset();
         if (presetType) document.getElementById('type').value = presetType;
-        // evento para sugestão de valor ao digitar descrição
         const descInput = document.getElementById('description');
-        const oldListener = descInput.oninput;
         descInput.oninput = function() { suggestAmountByDescription(this.value); };
     }
     
@@ -983,7 +997,7 @@
         document.getElementById('totalExpense').innerHTML=`R$ ${week.expense.toFixed(2)}`; 
         document.getElementById('totalIncome').innerHTML=`R$ ${week.income.toFixed(2)}`; 
         document.getElementById('totalBalance').innerHTML=`R$ ${week.balance.toFixed(2)}`; 
-        updateMetaUI(); generateInsights(); 
+        updateMetaUI(); 
     }
     function refreshAllUI() { renderWeekCalendar(); renderMonthCalendar(); updateBalances(); updateDescriptionDatalist(); }
     function saveData() { refreshAllUI(); if(currentUser) saveToCloud(); }
@@ -1041,7 +1055,7 @@
     document.getElementById('appointmentForm').addEventListener('submit',(e)=>{ e.preventDefault(); items.push({ id:Date.now(), type:'appointment', title:document.getElementById('appointmentTitle').value, time:document.getElementById('appointmentTime').value, location:document.getElementById('appointmentLocation').value, date:formatDateKey(selectedDateForModal || new Date()) }); saveData(); closeModal(); });
     document.getElementById('noteForm').addEventListener('submit',(e)=>{ e.preventDefault(); items.push({ id:Date.now(), type:'note', title:document.getElementById('noteTitle').value, content:document.getElementById('noteContent').value, date:formatDateKey(selectedDateForModal || new Date()) }); saveData(); closeModal(); });
     document.querySelectorAll('.tab-btn').forEach(btn=>{ btn.addEventListener('click',function(){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); document.getElementById(this.dataset.tab+'Tab').classList.add('active'); }); });
-    window.onclick=(e)=>{ if(e.target===document.getElementById('modal')) closeModal(); if(e.target===document.getElementById('reportModal')) closeReportModal(); if(e.target===document.getElementById('metaModal')) closeMetaModal(); if(e.target===document.getElementById('dayModal')) closeDayModal(); };
+    window.onclick=(e)=>{ if(e.target===document.getElementById('modal')) closeModal(); if(e.target===document.getElementById('reportModal')) closeReportModal(); if(e.target===document.getElementById('metaModal')) closeMetaModal(); if(e.target===document.getElementById('dayModal')) closeDayModal(); if(e.target===document.getElementById('insightsModal')) closeInsightsModal(); };
 
     // Modo escuro
     const darkModeToggle = document.getElementById('darkModeToggle');
@@ -1049,6 +1063,9 @@
         if(localStorage.getItem('darkMode') === 'enabled') { document.body.classList.add('dark-mode'); darkModeToggle.textContent = '☀️ Modo claro'; } else { darkModeToggle.textContent = '🌙 Modo escuro'; }
         darkModeToggle.addEventListener('click', () => { document.body.classList.toggle('dark-mode'); const isDark = document.body.classList.contains('dark-mode'); localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled'); darkModeToggle.textContent = isDark ? '☀️ Modo claro' : '🌙 Modo escuro'; });
     }
+    // Lâmpada de insights
+    const lamp = document.getElementById('insightsLamp');
+    if(lamp) lamp.addEventListener('click', showInsightsModal);
     // Login com Enter
     const loginEmail = document.getElementById('loginEmail'), loginPassword = document.getElementById('loginPassword'), loginBtn = document.getElementById('loginBtn');
     function handleLoginEnter(e) { if(e.key === 'Enter') login(); }
@@ -1056,7 +1073,7 @@
     if(loginPassword) loginPassword.addEventListener('keypress', handleLoginEnter);
     if(loginBtn) loginBtn.onclick = login;
     // Expor funções globais
-    window.login = login; window.signup = signup; window.logout = logout; window.openNewTransaction = openNewTransaction; window.editTransaction = editTransaction; window.closeModal = closeModal; window.deleteItem = deleteItem; window.openFullReport = openFullReport; window.generateWeeklyReport = generateWeeklyReport; window.generateMonthlyReport = generateMonthlyReport; window.closeReportModal = closeReportModal; window.prevMonth = prevMonth; window.nextMonth = nextMonth; window.showDayModal = showDayModal; window.closeDayModal = closeDayModal; window.repeatTransaction = repeatTransaction; window.openNewTransactionFromModal = openNewTransactionFromModal; window.editMeta = editMeta; window.saveMeta = saveMeta; window.closeMetaModal = closeMetaModal;
+    window.login = login; window.signup = signup; window.logout = logout; window.openNewTransaction = openNewTransaction; window.editTransaction = editTransaction; window.closeModal = closeModal; window.deleteItem = deleteItem; window.openFullReport = openFullReport; window.generateWeeklyReport = generateWeeklyReport; window.generateMonthlyReport = generateMonthlyReport; window.closeReportModal = closeReportModal; window.prevMonth = prevMonth; window.nextMonth = nextMonth; window.showDayModal = showDayModal; window.closeDayModal = closeDayModal; window.repeatTransaction = repeatTransaction; window.openNewTransactionFromModal = openNewTransactionFromModal; window.editMeta = editMeta; window.saveMeta = saveMeta; window.closeMetaModal = closeMetaModal; window.closeInsightsModal = closeInsightsModal;
     // Inicialização
     refreshAllUI();
 </script>
