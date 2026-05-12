@@ -1124,7 +1124,7 @@
         container.innerHTML = '';
         (userSettings.contacts || []).forEach((c, idx) => {
             let div = document.createElement('div'); div.className = 'contact-item';
-            div.innerHTML = `<span><strong>${escapeHtml(c.name)}</strong><br><small>${c.phone}</small></span>
+            let formattedPhone = c.phone.replace(/^55/, '+55 ').replace(/(\d{2})(\d{4,5})(\d{4})/, '$1 $2-$3'); div.innerHTML = `<span><strong>${escapeHtml(c.name)}</strong><br><small>${formattedPhone}</small></span> ...`;
                              <div><button class="send-wa-contact" data-phone="${c.phone}">📲</button>
                              <button class="del-contact" data-idx="${idx}">🗑️</button></div>`;
             container.appendChild(div);
@@ -1133,9 +1133,49 @@
         document.querySelectorAll('.del-contact').forEach(btn => btn.addEventListener('click', () => { userSettings.contacts.splice(parseInt(btn.dataset.idx),1); if(currentUser) saveToCloud(); renderContacts(); }));
         let select = document.getElementById('contactSelect'); if(select) { select.innerHTML = '<option value="">-- Contato favorito --</option>'; userSettings.contacts.forEach(c => { let opt = document.createElement('option'); opt.value = c.phone; opt.textContent = `${c.name} (${c.phone})`; select.appendChild(opt); }); }
     }
-    function addContact() { let name = document.getElementById('contactName').value.trim(), phone = document.getElementById('contactPhone').value.trim(); if(!name || !phone) { alert('Preencha nome e número'); return; } if(!userSettings.contacts) userSettings.contacts = []; userSettings.contacts.push({name, phone}); if(currentUser) saveToCloud(); renderContacts(); document.getElementById('contactName').value = ''; document.getElementById('contactPhone').value = ''; }
-
-    // ==================== WHATSAPP CORRIGIDO ====================
+   function addContact() {
+    let name = document.getElementById('contactName').value.trim();
+    let phone = document.getElementById('contactPhone').value.trim();
+    if (!name || !phone) {
+        alert('Preencha nome e número');
+        return;
+    }
+    // Remove tudo que não for dígito
+    let rawPhone = phone.replace(/\D/g, '');
+    // Adiciona o 55 se não começar com ele
+    if (!rawPhone.startsWith('55')) {
+        rawPhone = '55' + rawPhone;
+    }
+    // Validação: mínimo de 12 dígitos = 55 + DDD (2) + número (8 ou 9)
+    if (rawPhone.length < 12) {
+        alert('Número inválido. Use DDD + número (ex: 81999999999). O código 55 será adicionado automaticamente.');
+        return;
+    }
+    if (!userSettings.contacts) userSettings.contacts = [];
+    userSettings.contacts.push({ name, phone: rawPhone });
+    if (currentUser) saveToCloud();
+    renderContacts();
+    document.getElementById('contactName').value = '';
+    document.getElementById('contactPhone').value = '';
+}
+    // Normaliza o telefone: remove espaços, parênteses, traços, etc.
+    let rawPhone = phone.replace(/\D/g, '');
+    // Adiciona 55 se não começar com 55
+    if (!rawPhone.startsWith('55')) {
+        rawPhone = '55' + rawPhone;
+    }
+    // Validação básica: deve ter pelo menos 12 dígitos (55 + DDD + número)
+    if (rawPhone.length < 12) {
+        alert('Número inválido. Use DDD + número (ex: 81999999999). O código 55 será adicionado automaticamente.');
+        return;
+    }
+    if (!userSettings.contacts) userSettings.contacts = [];
+    userSettings.contacts.push({ name, phone: rawPhone });
+    if (currentUser) saveToCloud();
+    renderContacts();
+    document.getElementById('contactName').value = '';
+    document.getElementById('contactPhone').value = '';
+}
     function sendWhatsAppMessageDirect(phoneNumber, transaction) {
         if (!transaction && lastSavedTransaction) transaction = lastSavedTransaction;
         if (!transaction) { alert("Nada para enviar."); return; }
