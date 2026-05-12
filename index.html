@@ -2,8 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Dinheiro em Dia • Banco Digital</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>Dinheiro em Dia</title>
     <!-- Bibliotecas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -18,11 +18,8 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-        /* Impedir zoom automático em inputs no iOS (mantém controle do usuário) */
-        input, select, textarea {
-            font-size: 16px;
-        }
-        /* Tema claro */
+
+        /* Tema claro (padrão) */
         :root {
             --primary: #8b5cf6;
             --primary-dark: #6d28d9;
@@ -36,7 +33,8 @@
             --success: #10b981;
             --danger: #ef4444;
         }
-        /* Tema escuro - fundo preto/cinza escuro, textos claros */
+
+        /* Tema escuro (fundo totalmente preto/cinza escuro) */
         body.dark-mode {
             --primary: #a78bfa;
             --primary-dark: #8b5cf6;
@@ -45,17 +43,19 @@
             --background: #121212;
             --card-bg: #1e1e1e;
             --text-dark: #f0f0f0;
-            --text-gray: #cccccc;
+            --text-gray: #b0b0b0;
             --border: #333333;
             --success: #34d399;
             --danger: #f87171;
         }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--primary);
             min-height: 100vh;
             transition: background 0.3s, color 0.3s;
         }
+
         .app-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -64,10 +64,12 @@
             box-shadow: 0 0 40px rgba(0,0,0,0.1);
             transition: background 0.3s;
         }
+
         .dashboard-grid {
             display: block;
             padding: 0 0 80px 0;
         }
+
         @media (min-width: 900px) {
             .dashboard-grid {
                 display: grid;
@@ -78,9 +80,12 @@
             .fab { display: none; }
             .desktop-fab { display: block; }
         }
+
         @media (max-width: 899px) {
             .desktop-fab { display: none; }
         }
+
+        /* Header */
         .header {
             background: var(--primary);
             padding: 20px 20px 16px;
@@ -92,8 +97,10 @@
         }
         body.logged-in .logo h1 { font-size: 1.2rem; }
         body.logged-in .logo p { font-size: 0.6rem; }
-        .logo h1 { font-size: 1.5rem; font-weight: 700; }
+
+        .logo h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
         .logo p { font-size: 0.7rem; opacity: 0.85; margin-top: 4px; }
+
         .header-actions {
             display: flex;
             align-items: center;
@@ -102,6 +109,7 @@
             margin-top: 8px;
         }
         body.logged-in .header-actions { margin-top: 4px; }
+
         .insights-lamp {
             background: rgba(255,255,255,0.2);
             border: none;
@@ -117,6 +125,7 @@
             transition: 0.2s;
         }
         .insights-lamp:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
+
         .auth-section {
             display: flex;
             gap: 8px;
@@ -144,6 +153,7 @@
             font-weight: 600;
             cursor: pointer;
         }
+
         .user-info {
             display: flex;
             justify-content: space-between;
@@ -161,6 +171,7 @@
             border-radius: 30px;
             cursor: pointer;
         }
+
         .signup-guide {
             background: rgba(255,255,255,0.15);
             border-radius: 30px;
@@ -172,7 +183,9 @@
             flex-wrap: wrap;
             margin-top: 8px;
         }
-        .balance-card, .meta-card, .week-scroll, .month-card, .week-summary, .contacts-card {
+
+        /* Cards */
+        .balance-card, .meta-card, .shortcuts, .week-scroll, .month-card, .week-summary, .contacts-card {
             background: var(--card-bg);
             margin: 16px;
             border-radius: 24px;
@@ -184,6 +197,7 @@
                 margin: 0 0 20px 0;
             }
         }
+
         .balance-label {
             font-size: 0.7rem;
             text-transform: uppercase;
@@ -204,14 +218,18 @@
         }
         .stat { flex: 1; }
         .stat-label { font-size: 0.7rem; color: var(--text-gray); }
-        .stat-value { font-size: 1rem; font-weight: 700; color: var(--text-dark); }
+        .stat-value { font-size: 1rem; font-weight: 700; }
         .stat-income { color: var(--success); }
         .stat-expense { color: var(--danger); }
+
         .shortcuts {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            background: transparent;
+            box-shadow: none;
             margin: 0 16px 20px;
+            padding: 0;
         }
         .shortcut-item {
             flex: 1;
@@ -226,13 +244,17 @@
             border: 1px solid var(--border);
             transition: 0.1s;
         }
+        .shortcut-item:active { transform: scale(0.96); }
+
         .section-header {
             display: flex;
             justify-content: space-between;
+            align-items: baseline;
             padding: 8px 16px;
             font-weight: 600;
-            color: var(--text-dark);
+            font-size: 0.85rem;
         }
+
         .week-scroll { overflow-x: auto; padding: 0 16px 16px; }
         .week-days { display: flex; gap: 10px; min-width: min-content; }
         .day-chip {
@@ -243,14 +265,16 @@
             min-width: 65px;
             cursor: pointer;
             border: 1px solid var(--border);
+            transition: 0.1s;
         }
-        .day-chip.today { background: var(--primary-dark); color: white; }
+        .day-chip.today { background: var(--primary-dark); border-color: var(--primary-dark); color: white; }
         .day-chip.today .day-name, .day-chip.today .day-number, .day-chip.today .day-amount { color: white !important; }
-        .day-name { font-size: 0.65rem; color: var(--text-gray); }
+        .day-name { font-size: 0.65rem; font-weight: 500; color: var(--text-gray); }
         .day-number { font-size: 1rem; font-weight: 700; margin-top: 4px; color: var(--text-dark); }
         .day-amount { font-size: 0.6rem; font-weight: 600; margin-top: 6px; }
         .amount-positive { color: var(--success); }
         .amount-negative { color: var(--danger); }
+
         .month-card { padding: 16px; }
         .month-header {
             display: flex;
@@ -282,6 +306,7 @@
         .month-day {
             text-align: center;
             padding: 8px 4px;
+            font-weight: 500;
             border-radius: 16px;
             cursor: pointer;
             background: var(--background);
@@ -291,7 +316,7 @@
             align-items: center;
             justify-content: center;
             font-size: 0.75rem;
-            color: var(--text-dark);
+            transition: 0.1s;
         }
         .month-day.today {
             background: var(--primary-light);
@@ -312,6 +337,7 @@
         .indicator-up { color: var(--success); }
         .indicator-down { color: var(--danger); }
         .indicator-up.paid, .indicator-down.paid { text-decoration: line-through; opacity: 0.6; }
+
         .week-summary {
             display: flex;
             gap: 12px;
@@ -325,7 +351,8 @@
             border-radius: 20px;
         }
         .summary-label { font-size: 0.65rem; color: var(--text-gray); }
-        .summary-value { font-weight: 800; font-size: 0.9rem; color: var(--text-dark); }
+        .summary-value { font-weight: 800; font-size: 0.9rem; }
+
         .desktop-fab, .fab {
             background: var(--primary);
             color: white;
@@ -352,6 +379,8 @@
             margin: 0;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
+
+        /* Modais */
         .modal, .report-modal {
             display: none;
             position: fixed;
@@ -411,6 +440,7 @@
         }
         .tab-content { display: none; padding: 20px; }
         .tab-content.active { display: block; }
+
         .form-group { margin-bottom: 16px; }
         .form-group label {
             display: block;
@@ -462,6 +492,7 @@
             cursor: pointer;
             white-space: nowrap;
         }
+
         .date-selector {
             background: var(--primary-soft);
             padding: 12px;
@@ -473,6 +504,16 @@
             justify-content: space-between;
             flex-wrap: wrap;
         }
+        .selected-date-info {
+            background: var(--primary-soft);
+            padding: 12px;
+            border-radius: 16px;
+            margin: 16px 20px 0;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
         .sync-status {
             text-align: center;
             font-size: 0.7rem;
@@ -482,6 +523,11 @@
             margin: 0 16px 12px;
             border-radius: 30px;
         }
+        .sync-status.synced {
+            background: var(--success);
+            color: white;
+        }
+
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -503,11 +549,18 @@
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+
         .meta-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
+        }
+        .edit-meta-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
         }
         .meta-value { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
         .progress-bar-container {
@@ -525,6 +578,7 @@
             transition: width 0.3s;
         }
         .meta-status { font-size: 0.7rem; color: var(--text-gray); }
+
         .contacts-card { margin-top: 16px; }
         .contact-item {
             display: flex;
@@ -532,7 +586,6 @@
             align-items: center;
             padding: 8px;
             border-bottom: 1px solid var(--border);
-            color: var(--text-dark);
         }
         .contact-item button {
             background: none;
@@ -541,6 +594,7 @@
             font-size: 1rem;
             margin-left: 8px;
         }
+
         .day-modal-item {
             display: flex;
             align-items: center;
@@ -549,6 +603,7 @@
             border-bottom: 1px solid var(--border);
             flex-wrap: wrap;
         }
+        .day-modal-checkbox { margin-right: 8px; }
         .bulk-actions {
             padding: 12px 16px;
             display: flex;
@@ -556,36 +611,27 @@
             justify-content: flex-end;
             border-top: 1px solid var(--border);
         }
+
         #map { height: 300px; width: 100%; border-radius: 16px; margin-bottom: 12px; }
         .address-search { display: flex; gap: 8px; margin-bottom: 12px; }
-        /* Modo escuro - garantir que todos os textos fiquem claros */
-        body.dark-mode .balance-card, body.dark-mode .meta-card, body.dark-mode .month-card,
-        body.dark-mode .week-summary, body.dark-mode .contacts-card, body.dark-mode .shortcut-item,
-        body.dark-mode .day-chip, body.dark-mode .month-day, body.dark-mode .summary-item {
+
+        /* Ajustes modo escuro adicionais */
+        body.dark-mode .modal-content,
+        body.dark-mode .report-modal-content {
+            background: #1e1e1e;
+        }
+        body.dark-mode .day-chip,
+        body.dark-mode .month-day,
+        body.dark-mode .shortcut-item,
+        body.dark-mode .summary-item {
             background: #2a2a2a;
-            color: #f0f0f0;
-        }
-        body.dark-mode .stat-value, body.dark-mode .main-balance,
-        body.dark-mode .summary-value, body.dark-mode .day-number,
-        body.dark-mode .section-header, body.dark-mode .meta-value,
-        body.dark-mode .contact-item, body.dark-mode .day-modal-item,
-        body.dark-mode .modal-header h3, body.dark-mode .modal-tabs .tab-btn {
-            color: #f0f0f0 !important;
-        }
-        body.dark-mode .stat-label, body.dark-mode .summary-label, body.dark-mode .day-name,
-        body.dark-mode .weekday-header, body.dark-mode .meta-status {
-            color: #cccccc !important;
         }
         body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
             background: #333;
             color: white;
-            border-color: #555;
+            border-color: #444;
         }
         body.dark-mode .btn-cancel {
-            background: #333;
-            color: white;
-        }
-        body.dark-mode .close-modal, body.dark-mode .close-report-modal {
             background: #333;
             color: white;
         }
@@ -595,10 +641,10 @@
 <div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div></div>
 <div class="app-container">
     <div class="header">
-        <div class="logo"><h1>💰 dinheiro em dia</h1><p>Dinheiro Heimer</p></div>
+        <div class="logo"><h1>💰 dinheiro em dia</h1><p>Planejamento financeiro</p></div>
         <div class="header-actions">
             <button id="darkModeToggle" class="dark-mode-toggle">🌙 Modo escuro</button>
-            <button id="insightsLamp" class="insights-lamp" title="Dicas">💡</button>
+            <button id="insightsLamp" class="insights-lamp" title="Dicas e insights">💡</button>
             <div id="authSection" class="auth-section">
                 <input type="email" id="loginEmail" placeholder="seu@email.com">
                 <input type="password" id="loginPassword" placeholder="senha">
@@ -618,7 +664,9 @@
             <span>✅ Depois faça login</span>
         </div>
     </div>
+
     <div id="syncStatus" class="sync-status">🔐 Faça login para salvar</div>
+
     <div class="dashboard-grid">
         <div class="left-column">
             <div class="meta-card">
@@ -627,6 +675,7 @@
                 <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
                 <div class="meta-status" id="metaStatus">Defina uma meta</div>
             </div>
+
             <div class="balance-card">
                 <div class="balance-label">saldo disponível</div>
                 <div class="main-balance" id="mainBalance">R$ 0,00</div>
@@ -639,6 +688,7 @@
                     <div class="stat"><div class="stat-label">despesas da semana</div><div class="stat-value stat-expense" id="weekExpense">R$ 0</div></div>
                 </div>
             </div>
+
             <div class="shortcuts">
                 <div class="shortcut-item" data-action="income">💰 Receita</div>
                 <div class="shortcut-item" data-action="expense">💸 Despesa</div>
@@ -646,43 +696,49 @@
                 <div class="shortcut-item" data-action="weekReport">📅 Semana</div>
                 <div class="shortcut-item" data-action="monthReport">📆 Mês</div>
             </div>
+
             <div class="section-header"><span>📅 Esta semana</span><span id="currentMonthLabel"></span></div>
             <div class="week-scroll"><div class="week-days" id="weekDaysContainer"></div></div>
+
             <div class="month-card">
                 <div class="month-header"><button class="month-nav" id="prevMonthBtn">◀</button><span id="monthTitle"></span><button class="month-nav" id="nextMonthBtn">▶</button></div>
                 <div class="month-grid" id="monthGrid"></div>
             </div>
         </div>
+
         <div class="right-column">
             <div class="week-summary">
                 <div class="summary-item"><div class="summary-label">🔴 Despesas</div><div class="summary-value" id="totalExpense">R$ 0</div></div>
                 <div class="summary-item"><div class="summary-label">🟢 Receitas</div><div class="summary-value" id="totalIncome">R$ 0</div></div>
                 <div class="summary-item"><div class="summary-label">💰 Saldo</div><div class="summary-value" id="totalBalance">R$ 0</div></div>
             </div>
+
             <button class="desktop-fab" id="desktopFabBtn">➕ Nova transação</button>
+
             <div class="contacts-card">
-                <div class="section-header">📞 Contatos favoritos (WhatsApp)</div>
+                <div class="insights-header">📞 Contatos favoritos (WhatsApp)</div>
                 <div id="contactsList" style="max-height: 200px; overflow-y: auto;"></div>
                 <div style="display: flex; gap: 8px; margin-top: 8px;">
                     <input type="text" id="contactName" placeholder="Nome" style="flex:1;">
-                    <input type="tel" id="contactPhone" placeholder="DDD+Número (ex: 8199999999)" style="flex:1;">
+                    <input type="tel" id="contactPhone" placeholder="Número (com DDI)" style="flex:1;">
                     <button id="addContactBtn" class="small-btn">+</button>
                 </div>
-                <p style="font-size: 0.65rem; margin-top: 8px; color: var(--text-gray);">Número será salvo com +55 automático</p>
             </div>
+
             <div style="margin: 16px;">
                 <button id="deleteAllDataBtn" class="btn-cancel" style="background:#ef4444; color:white;">⚠️ Apagar TODOS os dados</button>
             </div>
         </div>
     </div>
 </div>
+
 <button class="fab" id="fabBtn">+</button>
 
 <!-- Modal de Transação -->
 <div id="modal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h3 id="modalTitle">Nova transação</h3><button class="close-modal" id="closeModalBtn">Fechar</button></div>
-        <div id="modalDateInfo" class="date-selector"></div>
+        <div id="modalDateInfo" class="selected-date-info"></div>
         <div class="modal-tabs">
             <button class="tab-btn active" data-tab="financial">💰 Financeiro</button>
             <button class="tab-btn" data-tab="appointment">📅 Compromisso</button>
@@ -691,8 +747,8 @@
         <div id="financialTab" class="tab-content active">
             <form id="financialForm">
                 <div class="form-group"><label>Tipo</label><select id="type"><option value="expense">🔴 Despesa</option><option value="income">🟢 Receita</option></select></div>
-                <div class="form-group"><label>Descrição</label><input type="text" id="description" list="descSuggestions" required><datalist id="descSuggestions"></datalist></div>
-                <div class="form-group"><label>Valor (R$)</label><input type="number" id="amount" step="0.01" required></div>
+                <div class="form-group"><label>Descrição</label><input type="text" id="description" list="descSuggestions" required placeholder="Ex: Almoço, Salário"><datalist id="descSuggestions"></datalist></div>
+                <div class="form-group"><label>Valor (R$)</label><input type="number" id="amount" step="0.01" required placeholder="0,00"></div>
                 <div class="form-group"><label>Status</label><select id="status"><option value="pending">⏳ Pendente</option><option value="paid">✅ Pago/Recebido</option></select></div>
                 <div class="form-buttons"><button type="button" class="btn-cancel" id="cancelModalBtn">Cancelar</button><button type="submit" class="btn-save">Salvar</button></div>
             </form>
@@ -714,14 +770,14 @@
         <div id="noteTab" class="tab-content">
             <form id="noteForm">
                 <div class="form-group"><label>Título</label><input type="text" id="noteTitle" required></div>
-                <div class="form-group"><label>Conteúdo</label><textarea id="noteContent" rows="4"></textarea></div>
+                <div class="form-group"><label>Conteúdo</label><textarea id="noteContent" rows="4" placeholder="Escreva sua anotação..."></textarea></div>
                 <div class="form-buttons"><button type="button" class="btn-cancel" id="cancelNoteBtn">Cancelar</button><button type="submit" class="btn-save">Salvar</button></div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modal de Detalhe do Dia -->
+<!-- Modal de Detalhe do Dia com seleção múltipla -->
 <div id="dayModal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h3 id="dayModalTitle">Detalhes do dia</h3><button class="close-modal" id="closeDayModalBtn">Fechar</button></div>
@@ -729,7 +785,9 @@
         <div class="bulk-actions">
             <button id="deleteSelectedBtn" class="btn-cancel" style="background:#ef4444; color:white;">🗑️ Excluir selecionados</button>
         </div>
-        <div style="padding: 0 20px 20px;"><button class="btn-save" id="addTransactionFromDayBtn">+ Adicionar transação</button></div>
+        <div style="padding: 0 20px 20px;">
+            <button class="btn-save" id="addTransactionFromDayBtn">+ Adicionar transação</button>
+        </div>
     </div>
 </div>
 
@@ -739,7 +797,7 @@
         <div class="modal-header"><h3>📍 Selecione o local</h3><button class="close-modal" id="closeMapModalBtn">Fechar</button></div>
         <div style="padding:20px;">
             <div class="address-search">
-                <input type="text" id="addressSearchInput" placeholder="Digite um endereço">
+                <input type="text" id="addressSearchInput" placeholder="Digite um endereço ou CEP">
                 <button id="searchAddressBtn">Buscar</button>
                 <button id="useGpsBtn" class="small-btn">📍 Minha localização</button>
             </div>
@@ -749,15 +807,15 @@
     </div>
 </div>
 
-<!-- Modal WhatsApp CORRIGIDO -->
+<!-- Modal de WhatsApp -->
 <div id="whatsappModal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h3>📲 Enviar via WhatsApp</h3><button class="close-modal" id="closeWhatsappModalBtn">Fechar</button></div>
         <div style="padding:20px;">
             <p id="whatsappMessagePreview" style="background:var(--primary-soft); padding:12px; border-radius:12px; margin-bottom:12px;"></p>
             <div class="form-group"><label>Contato favorito</label><select id="contactSelect"><option value="">-- Escolher --</option></select></div>
-            <div class="form-group"><label>Ou digite o número (apenas DDD+número, ex: 8199999999)</label><input type="tel" id="manualPhone" placeholder="8199999999"></div>
-            <button id="sendWhatsappBtn" class="btn-save" style="margin-top:12px;">Enviar mensagem</button>
+            <div class="form-group"><label>Ou digite o número (com DDI, ex: 5511999999999)</label><input type="tel" id="manualPhone" placeholder="5511999999999"></div>
+            <button id="sendWhatsappBtn" class="btn-save">Enviar mensagem</button>
         </div>
     </div>
 </div>
@@ -790,7 +848,7 @@
 </div>
 
 <script>
-    // ========== CONFIG FIREBASE ==========
+    // ==================== CONFIGURAÇÃO FIREBASE ====================
     const firebaseConfig = {
         apiKey: "AIzaSyAE6OgotOg-Y36IGAqUScMvo_LymmTNdK4",
         authDomain: "food-delivery-fb89e.firebaseapp.com",
@@ -804,7 +862,7 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    // ========== VARIÁVEIS ==========
+    // ==================== VARIÁVEIS GLOBAIS ====================
     let currentUser = null;
     let items = [];
     let currentMonth = new Date();
@@ -814,20 +872,15 @@
     let lastSavedTransaction = null;
     let currentDayModalDate = null;
 
-    // ========== AUXILIARES ==========
+    // ==================== FUNÇÕES AUXILIARES ====================
     function showLoading() { document.getElementById('loadingOverlay').style.display = 'flex'; }
     function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
     function formatDateKey(d) { let dd = new Date(d); return `${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,'0')}-${String(dd.getDate()).padStart(2,'0')}`; }
-    function parseLocalDate(str) { let [y,m,d]=str.split('-'); return new Date(y, m-1, d); }
+    function parseLocalDate(str) { let [y,m,d] = str.split('-'); return new Date(y, m-1, d); }
     function formatDateDisplay(d) { return new Date(d).toLocaleDateString('pt-BR'); }
     function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
-    function formatPhoneForWhatsApp(phone) {
-        let cleaned = phone.replace(/\D/g, '');
-        if (!cleaned.startsWith('55')) cleaned = '55' + cleaned;
-        return cleaned;
-    }
 
-    // ========== FIREBASE ==========
+    // ==================== FIREBASE ====================
     async function saveToCloud() {
         if(!currentUser) return;
         await db.ref(`users/${currentUser.uid}/items`).set(items);
@@ -841,7 +894,9 @@
             const snapSettings = await db.ref(`users/${uid}/settings`).once('value');
             const settings = snapSettings.val() || {};
             userSettings = { meta: settings.meta || 0, contacts: settings.contacts || [] };
-            updateDescriptionDatalist(); updateMetaUI(); renderContacts(); updateBalances();
+            updateDescriptionDatalist();
+            updateMetaUI();
+            renderContacts();
             document.getElementById('syncStatus').textContent = `✅ ${items.length} itens carregados`;
             document.getElementById('syncStatus').classList.add('synced');
             refreshAllUI();
@@ -849,7 +904,7 @@
         finally { hideLoading(); }
     }
 
-    // ========== AUTOCOMPLETE ==========
+    // ==================== AUTOCOMPLETE DESCRIÇÃO ====================
     function getDescriptionSuggestions() {
         let freq = new Map();
         items.filter(i => i.type === 'income' || i.type === 'expense').forEach(t => freq.set(t.title, (freq.get(t.title)||0)+1));
@@ -869,7 +924,7 @@
         }
     }
 
-    // ========== META ==========
+    // ==================== META ====================
     function updateMetaUI() {
         let meta = userSettings.meta || 0;
         document.getElementById('metaValueDisplay').innerHTML = `R$ ${meta.toFixed(2)}`;
@@ -883,7 +938,7 @@
     function closeMetaModal() { document.getElementById('metaModal').style.display = 'none'; }
     function saveMeta() { let v = parseFloat(document.getElementById('metaAmountInput').value); if(!isNaN(v) && v>=0) { userSettings.meta = v; if(currentUser) saveToCloud(); updateMetaUI(); closeMetaModal(); } }
 
-    // ========== DADOS ==========
+    // ==================== DADOS FINANCEIROS ====================
     function getFinancialItemsForDate(d) { let key = formatDateKey(d); return items.filter(i => i.date === key && (i.type === 'income' || i.type === 'expense')); }
     function getItemsForDate(d) { return items.filter(i => i.date === formatDateKey(d)); }
     function getDaySummary(d) { let inc=0, exp=0; getFinancialItemsForDate(d).forEach(i => { if(i.type === 'income') inc += i.amount; else exp += i.amount; }); return { balance: inc-exp, income: inc, expense: exp }; }
@@ -891,7 +946,7 @@
     function getMonthStats() { let inc=0, exp=0, today=new Date(); for(let d=1;d<=31;d++){ let date=new Date(today.getFullYear(),today.getMonth(),d); if(date.getMonth()!==today.getMonth()) break; getFinancialItemsForDate(date).forEach(i=>{ if(i.type==='income') inc+=i.amount; else exp+=i.amount; }); } return { income: inc, expense: exp, balance: inc-exp }; }
     function updateBalances() { let week=getWeekBalance(new Date()), month=getMonthStats(); document.getElementById('mainBalance').innerHTML = `R$ ${month.balance.toFixed(2)}`; document.getElementById('monthIncome').innerHTML = `R$ ${month.income.toFixed(2)}`; document.getElementById('monthExpense').innerHTML = `R$ ${month.expense.toFixed(2)}`; document.getElementById('weekIncome').innerHTML = `R$ ${week.income.toFixed(2)}`; document.getElementById('weekExpense').innerHTML = `R$ ${week.expense.toFixed(2)}`; document.getElementById('totalExpense').innerHTML = `R$ ${week.expense.toFixed(2)}`; document.getElementById('totalIncome').innerHTML = `R$ ${week.income.toFixed(2)}`; document.getElementById('totalBalance').innerHTML = `R$ ${week.balance.toFixed(2)}`; updateMetaUI(); }
 
-    // ========== CALENDÁRIOS ==========
+    // ==================== CALENDÁRIOS ====================
     function renderWeekCalendar() {
         let today = new Date(), start = new Date(today); start.setDate(today.getDate()-today.getDay());
         let weekDays = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
@@ -903,7 +958,7 @@
         let year = currentMonth.getFullYear(), month = currentMonth.getMonth();
         let firstDay = new Date(year,month,1), lastDay = new Date(year,month+1,0);
         let startDay = firstDay.getDay(), totalDays = lastDay.getDate(), today = new Date();
-        document.getElementById('monthTitle').innerHTML = currentMonth.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+        document.getElementById('monthTitle').innerHTML = currentMonth.toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^./, l=>l.toUpperCase());
         let grid = document.getElementById('monthGrid'); grid.innerHTML = '';
         ['D','S','T','Q','Q','S','S'].forEach(day => { let h = document.createElement('div'); h.className = 'weekday-header'; h.textContent = day; grid.appendChild(h); });
         for(let i=0;i<startDay;i++){ let e = document.createElement('div'); e.className = 'month-day'; e.style.background = 'transparent'; e.style.cursor = 'default'; grid.appendChild(e); }
@@ -911,7 +966,7 @@
     }
     function refreshAllUI() { renderWeekCalendar(); renderMonthCalendar(); updateBalances(); updateDescriptionDatalist(); }
 
-    // ========== MODAL DO DIA ==========
+    // ==================== MODAL DO DIA (EXCLUSÃO MÚLTIPLA) ====================
     function showDayModal(date) {
         currentDayModalDate = date;
         document.getElementById('dayModalTitle').innerHTML = formatDateDisplay(date);
@@ -947,17 +1002,17 @@
         if(currentDayModalDate) showDayModal(currentDayModalDate); else closeDayModal();
     }
     function deleteAllData() {
-        if(!confirm('⚠️ Isso apagará TODOS os dados. Digite "APAGAR" para confirmar.')) return;
-        let confirmText = prompt('Digite APAGAR:');
-        if(confirmText !== 'APAGAR') { alert('Cancelado'); return; }
+        if(!confirm('⚠️ ATENÇÃO: isso apagará TODOS os dados (transações, compromissos, anotações). Digite "APAGAR" para confirmar.')) return;
+        let confirmText = prompt('Digite APAGAR para confirmar a exclusão total:');
+        if(confirmText !== 'APAGAR') { alert('Exclusão cancelada'); return; }
         items = [];
         if(currentUser) saveToCloud();
         refreshAllUI();
         alert('Todos os dados foram removidos.');
-        if(currentDayModalDate) showDayModal(currentDayModalDate);
+        if(currentDayModalDate) showDayModal(currentDayModalDate); else closeDayModal();
     }
 
-    // ========== CONTATOS ==========
+    // ==================== CONTATOS ====================
     function renderContacts() {
         let container = document.getElementById('contactsList'); if(!container) return;
         container.innerHTML = '';
@@ -972,58 +1027,28 @@
         document.querySelectorAll('.del-contact').forEach(btn => btn.addEventListener('click', () => { userSettings.contacts.splice(parseInt(btn.dataset.idx),1); if(currentUser) saveToCloud(); renderContacts(); }));
         let select = document.getElementById('contactSelect'); if(select) { select.innerHTML = '<option value="">-- Contato favorito --</option>'; userSettings.contacts.forEach(c => { let opt = document.createElement('option'); opt.value = c.phone; opt.textContent = `${c.name} (${c.phone})`; select.appendChild(opt); }); }
     }
-    function addContact() {
-        let name = document.getElementById('contactName').value.trim();
-        let phone = document.getElementById('contactPhone').value.trim();
-        if(!name || !phone) { alert('Preencha nome e número (apenas DDD+número)'); return; }
-        let cleaned = phone.replace(/\D/g, '');
-        if(!cleaned.match(/^\d{10,11}$/)) { alert('Número inválido. Exemplo: 8199999999 (10 ou 11 dígitos)'); return; }
-        let fullNumber = '55' + cleaned;
-        if(!userSettings.contacts) userSettings.contacts = [];
-        userSettings.contacts.push({name, phone: fullNumber});
-        if(currentUser) saveToCloud();
-        renderContacts();
-        document.getElementById('contactName').value = '';
-        document.getElementById('contactPhone').value = '';
-    }
+    function addContact() { let name = document.getElementById('contactName').value.trim(), phone = document.getElementById('contactPhone').value.trim(); if(!name || !phone) { alert('Preencha nome e número'); return; } if(!userSettings.contacts) userSettings.contacts = []; userSettings.contacts.push({name, phone}); if(currentUser) saveToCloud(); renderContacts(); document.getElementById('contactName').value = ''; document.getElementById('contactPhone').value = ''; }
 
-    // ========== WHATSAPP ==========
+    // ==================== WHATSAPP ====================
     function sendWhatsAppMessageDirect(phone, transaction = null) {
         if(!transaction && lastSavedTransaction) transaction = lastSavedTransaction;
         if(!transaction) { alert('Nada para enviar'); return; }
         let tipo = transaction.type === 'expense' ? '🔴 DESPESA' : '🟢 RECEITA';
         let msg = `💰 *${tipo}*\n📝 ${transaction.title}\n💵 R$ ${transaction.amount.toFixed(2)}\n📅 Data: ${transaction.date}\n⏳ Status: ${transaction.status === 'paid' ? 'Pago/Recebido' : 'Pendente'}`;
-        let finalPhone = formatPhoneForWhatsApp(phone);
-        window.open(`https://wa.me/${finalPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+        window.open(`https://wa.me/${phone.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
     }
-    function openWhatsAppModal(transaction) {
-        lastSavedTransaction = transaction;
-        document.getElementById('whatsappMessagePreview').innerHTML = `<strong>Pré-visualização:</strong><br>${transaction.type==='expense'?'🔴 Despesa':'🟢 Receita'} ${transaction.title} - R$ ${transaction.amount.toFixed(2)} (${transaction.date})`;
-        document.getElementById('contactSelect').value = '';
-        document.getElementById('manualPhone').value = '';
-        document.getElementById('whatsappModal').style.display = 'flex';
-    }
-    function sendFromModal() {
-        let selectedContact = document.getElementById('contactSelect').value;
-        let manual = document.getElementById('manualPhone').value.trim();
-        let phone = selectedContact || manual;
-        if(!phone) { alert('Selecione um contato ou digite um número'); return; }
-        if(manual && !manual.replace(/\D/g,'').match(/^\d{10,11}$/)) { alert('Número inválido. Use apenas DDD+número, ex: 8199999999'); return; }
-        let finalPhone = formatPhoneForWhatsApp(phone);
-        sendWhatsAppMessageDirect(finalPhone, lastSavedTransaction);
-        document.getElementById('whatsappModal').style.display = 'none';
-        lastSavedTransaction = null;
-    }
+    function openWhatsAppModal(transaction) { lastSavedTransaction = transaction; document.getElementById('whatsappMessagePreview').innerHTML = `<strong>Pré-visualização:</strong><br>${transaction.type==='expense'?'🔴 Despesa':'🟢 Receita'} ${transaction.title} - R$ ${transaction.amount.toFixed(2)} (${transaction.date})`; document.getElementById('contactSelect').value = ''; document.getElementById('manualPhone').value = ''; document.getElementById('whatsappModal').style.display = 'flex'; }
+    function sendFromModal() { let phone = document.getElementById('contactSelect').value || document.getElementById('manualPhone').value; if(!phone) { alert('Selecione ou digite um número'); return; } sendWhatsAppMessageDirect(phone, lastSavedTransaction); document.getElementById('whatsappModal').style.display = 'none'; lastSavedTransaction = null; }
 
-    // ========== MAPA ==========
+    // ==================== MAPA COM GPS (CENTRALIZA NA LOCALIZAÇÃO ATUAL) ====================
     function initMapWithGPS() {
         if(map) map.remove();
-        let defaultLat = -7.933, defaultLng = -34.873;
+        let defaultLat = -7.933, defaultLng = -34.873; // Paulista-PE
         document.getElementById('mapModal').style.display = 'flex';
         setTimeout(() => {
             if(map) map.remove();
             map = L.map('map').setView([defaultLat, defaultLng], 13);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OSM' }).addTo(map);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>' }).addTo(map);
             if(currentMarker) map.removeLayer(currentMarker);
             currentMarker = L.marker([defaultLat, defaultLng]).addTo(map);
             if(navigator.geolocation) {
@@ -1059,7 +1084,7 @@
     function useLocationFromMap() { if(selectedAddress) document.getElementById('appointmentLocation').value = selectedAddress; document.getElementById('mapModal').style.display = 'none'; }
     function getCurrentLocationGPS() { if(navigator.geolocation) { navigator.geolocation.getCurrentPosition(pos => { let {latitude, longitude} = pos.coords; map.setView([latitude, longitude], 16); if(currentMarker) map.removeLayer(currentMarker); currentMarker = L.marker([latitude, longitude]).addTo(map); reverseGeocodeNow(latitude, longitude); }, err => alert('Não foi possível obter localização')); } else alert('Geolocalização não suportada'); async function reverseGeocodeNow(lat,lng){ let res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=pt-BR`); let data = await res.json(); selectedAddress = data.display_name || `${lat}, ${lng}`; document.getElementById('addressSearchInput').value = selectedAddress; } }
 
-    // ========== TRANSAÇÕES ==========
+    // ==================== TRANSAÇÕES (CRUD) ====================
     function handleFinancialSubmit(e) {
         e.preventDefault();
         let dateInput = document.getElementById('transactionDate');
@@ -1088,8 +1113,7 @@
         document.getElementById('description').oninput = function() { suggestAmountByDescription(this.value); };
     }
     function openModalWithDate(date, tab) {
-        let html = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(date)}"></div>`;
-        document.getElementById('modalDateInfo').innerHTML = html;
+        document.getElementById('modalDateInfo').innerHTML = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${formatDateKey(date)}"></div>`;
         document.getElementById('modal').style.display = 'flex';
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1100,23 +1124,24 @@
     function repeatTransaction(index) { let original = items[index]; if(!original) return; editingItemId = null; let today = new Date(); openModalWithDate(today, 'financial'); document.getElementById('type').value = original.type; document.getElementById('description').value = original.title; document.getElementById('amount').value = original.amount; document.getElementById('status').value = original.status || 'pending'; document.getElementById('modalTitle').innerHTML = 'Repetir transação'; }
     function closeModal() { document.getElementById('modal').style.display = 'none'; editingItemId = null; }
     function saveData() { refreshAllUI(); if(currentUser) saveToCloud(); }
+    function deleteItem(index) { if(confirm('Excluir este item?')) { items.splice(index,1); saveData(); } }
 
-    // ========== RELATÓRIOS ==========
-    function openFullReport() { let week=getWeekBalance(new Date()), month=getMonthStats(); let total=0,rec=0,desp=0; items.filter(i=>i.type==='income'||i.type==='expense').forEach(i=>{ if(i.type==='income'){ total+=i.amount; rec++; } else { total-=i.amount; desp++; } }); let html = `<div><strong>📊 RESUMO COMPLETO</strong><br><div style="background:var(--primary-soft);padding:12px;border-radius:16px;margin-bottom:16px">💰 SALDO TOTAL: ${total>=0?'+':'-'} R$ ${Math.abs(total).toFixed(2)}</div><div>🟢 Receitas mês: R$ ${month.income.toFixed(2)} (${rec} transações)</div><div>🔴 Despesas mês: R$ ${month.expense.toFixed(2)} (${desp} transações)</div><div>📆 Semana: Saldo ${week.balance>=0?'+':'-'} R$ ${Math.abs(week.balance).toFixed(2)}</div></div>`; document.getElementById('reportModalContent').innerHTML = html; document.getElementById('reportModal').style.display = 'flex'; }
-    function generateWeeklyReport() { let week=getWeekBalance(new Date()); document.getElementById('reportModalContent').innerHTML = `<strong>📊 RELATÓRIO DA SEMANA</strong><br>Receitas: R$ ${week.income.toFixed(2)}<br>Despesas: R$ ${week.expense.toFixed(2)}<br>Saldo: ${week.balance>=0?'+':'-'} R$ ${Math.abs(week.balance).toFixed(2)}`; document.getElementById('reportModal').style.display = 'flex'; }
-    function generateMonthlyReport() { let month=getMonthStats(); document.getElementById('reportModalContent').innerHTML = `<strong>📅 RELATÓRIO DO MÊS</strong><br>Receitas: R$ ${month.income.toFixed(2)}<br>Despesas: R$ ${month.expense.toFixed(2)}<br>Saldo: ${month.balance>=0?'+':'-'} R$ ${Math.abs(month.balance).toFixed(2)}`; document.getElementById('reportModal').style.display = 'flex'; }
+    // ==================== RELATÓRIOS E INSIGHTS ====================
+    function openFullReport() { let week = getWeekBalance(new Date()), month = getMonthStats(); let total=0, rec=0, desp=0; items.filter(i=>i.type==='income'||i.type==='expense').forEach(i=>{ if(i.type==='income'){ total+=i.amount; rec++; } else { total-=i.amount; desp++; } }); let html = `<div><strong>📊 RESUMO COMPLETO</strong><br><div style="background:var(--primary-soft);padding:12px;border-radius:16px;margin-bottom:16px">💰 SALDO TOTAL: ${total>=0?'+':'-'} R$ ${Math.abs(total).toFixed(2)}</div><div>🟢 Receitas mês: R$ ${month.income.toFixed(2)} (${rec} transações)</div><div>🔴 Despesas mês: R$ ${month.expense.toFixed(2)} (${desp} transações)</div><div>📆 Semana: Saldo ${week.balance>=0?'+':'-'} R$ ${Math.abs(week.balance).toFixed(2)}</div></div>`; document.getElementById('reportModalContent').innerHTML = html; document.getElementById('reportModal').style.display = 'flex'; }
+    function generateWeeklyReport() { let week = getWeekBalance(new Date()); document.getElementById('reportModalContent').innerHTML = `<strong>📊 RELATÓRIO DA SEMANA</strong><br>Receitas: R$ ${week.income.toFixed(2)}<br>Despesas: R$ ${week.expense.toFixed(2)}<br>Saldo: ${week.balance>=0?'+':'-'} R$ ${Math.abs(week.balance).toFixed(2)}`; document.getElementById('reportModal').style.display = 'flex'; }
+    function generateMonthlyReport() { let month = getMonthStats(); document.getElementById('reportModalContent').innerHTML = `<strong>📅 RELATÓRIO DO MÊS</strong><br>Receitas: R$ ${month.income.toFixed(2)}<br>Despesas: R$ ${month.expense.toFixed(2)}<br>Saldo: ${month.balance>=0?'+':'-'} R$ ${Math.abs(month.balance).toFixed(2)}`; document.getElementById('reportModal').style.display = 'flex'; }
     function closeReportModal() { document.getElementById('reportModal').style.display = 'none'; }
-    function showInsightsModal() { let monthStats=getMonthStats(); let pending=items.filter(i=>(i.type==='income'||i.type==='expense')&&i.status==='pending').length; let html = `<div class="insight-item">💰 Saldo do mês: ${monthStats.balance>=0?'positivo':'negativo'} (R$ ${Math.abs(monthStats.balance).toFixed(2)})</div><div class="insight-item">${pending>0?`⏳ ${pending} transação(ões) pendente(s)`:'✅ Todas as transações estão em dia'}</div>`; document.getElementById('insightsModalContent').innerHTML = html; document.getElementById('insightsModal').style.display = 'flex'; }
+    function showInsightsModal() { let monthStats = getMonthStats(); let pending = items.filter(i=>(i.type==='income'||i.type==='expense')&&i.status==='pending').length; let html = `<div class="insight-item">💰 Saldo do mês: ${monthStats.balance>=0?'positivo':'negativo'} (R$ ${Math.abs(monthStats.balance).toFixed(2)})</div><div class="insight-item">${pending>0?`⏳ ${pending} transação(ões) pendente(s)`:'✅ Todas as transações estão em dia'}</div>`; document.getElementById('insightsModalContent').innerHTML = html; document.getElementById('insightsModal').style.display = 'flex'; }
     function closeInsightsModal() { document.getElementById('insightsModal').style.display = 'none'; }
     function prevMonth() { currentMonth.setMonth(currentMonth.getMonth()-1); renderMonthCalendar(); }
     function nextMonth() { currentMonth.setMonth(currentMonth.getMonth()+1); renderMonthCalendar(); }
 
-    // ========== AUTENTICAÇÃO ==========
+    // ==================== AUTENTICAÇÃO ====================
     async function login() { let email = document.getElementById('loginEmail').value, pass = document.getElementById('loginPassword').value; if(!email||!pass){alert('Preencha e-mail e senha');return;} showLoading(); try{ await auth.signInWithEmailAndPassword(email,pass); alert('✅ Login realizado!'); document.getElementById('loginEmail').value = ''; document.getElementById('loginPassword').value = ''; } catch(e){ alert('❌ '+e.message); } finally{ hideLoading(); } }
     async function signup() { let email = document.getElementById('loginEmail').value, pass = document.getElementById('loginPassword').value; if(!email||pass.length<6){alert('E-mail inválido ou senha com menos de 6 caracteres');return;} showLoading(); try{ await auth.createUserWithEmailAndPassword(email,pass); alert('✅ Conta criada! Faça login.'); document.getElementById('loginPassword').value = ''; } catch(e){ alert('❌ '+e.message); } finally{ hideLoading(); } }
     async function logout() { try{ await auth.signOut(); } catch(e){ alert(e.message); } }
 
-    // ========== EVENT LISTENERS ==========
+    // ==================== EVENT LISTENERS ====================
     document.getElementById('openMapBtn')?.addEventListener('click', initMapWithGPS);
     document.getElementById('closeMapModalBtn')?.addEventListener('click', () => document.getElementById('mapModal').style.display = 'none');
     document.getElementById('searchAddressBtn')?.addEventListener('click', searchAddress);
