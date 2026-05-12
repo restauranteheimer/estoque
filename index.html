@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <title>Dinheiro em Dia login</title>
+    <title>Dinheiro em Dia • Banco Digital</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -678,7 +678,6 @@
 </div>
 
 <script>
-    // Firebase config
     const firebaseConfig = {
         apiKey: "AIzaSyAE6OgotOg-Y36IGAqUScMvo_LymmTNdK4",
         authDomain: "food-delivery-fb89e.firebaseapp.com",
@@ -692,182 +691,201 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    // ========== VARIÁVEIS GLOBAIS ==========
+    // ========== VARIÁVEIS ==========
     let currentUser = null;
     let items = [];
     let currentMonth = new Date();
     let editingItemId = null;
     let userSettings = { meta: 0 };
 
-    // ========== FUNÇÕES AUXILIARES ==========
-    function showLoading() { document.getElementById('loadingOverlay').style.display = 'flex'; }
-    function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
-    function formatDateKey(date) { 
+    // ========== FUNÇÕES DE DATA CORRIGIDAS (fuso local) ==========
+    function formatDateKey(date) {
         if (!date) return '';
+        // Recebe um objeto Date já no horário local (criado corretamente)
         const d = new Date(date);
-        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; 
-    }
-    function formatDateDisplay(date) { 
-        if (!date) return '';
-        const d = new Date(date);
-        return d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }); 
-    }
-    function getWeekRange() { 
-        const today=new Date(), start=new Date(today); 
-        start.setDate(today.getDate()-today.getDay()); 
-        const end=new Date(start); 
-        end.setDate(start.getDate()+6); 
-        return `${start.getDate()}/${start.getMonth()+1} a ${end.getDate()}/${end.getMonth()+1}`; 
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
-    // ========== FIREBASE ==========
-    async function saveToCloud() { 
-        if(!currentUser) return; 
-        await db.ref(`users/${currentUser.uid}/items`).set(items); 
-        await db.ref(`users/${currentUser.uid}/settings`).set(userSettings); 
+    // Cria um objeto Date a partir de string "YYYY-MM-DD" respeitando o fuso local
+    function parseLocalDate(dateString) {
+        if (!dateString) return new Date();
+        const [year, month, day] = dateString.split('-').map(Number);
+        // Mês no construtor é 0-index, por isso month-1
+        return new Date(year, month - 1, day);
     }
-    async function loadUserData(uid) { 
-        showLoading(); 
+
+    function formatDateDisplay(date) {
+        if (!date) return '';
+        const d = new Date(date);
+        return d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    function getWeekRange() {
+        const today = new Date(), start = new Date(today);
+        start.setDate(today.getDate() - today.getDay());
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        return `${start.getDate()}/${start.getMonth()+1} a ${end.getDate()}/${end.getMonth()+1}`;
+    }
+
+    function showLoading() { document.getElementById('loadingOverlay').style.display = 'flex'; }
+    function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
+
+    // ========== FIREBASE ==========
+    async function saveToCloud() {
+        if (!currentUser) return;
+        await db.ref(`users/${currentUser.uid}/items`).set(items);
+        await db.ref(`users/${currentUser.uid}/settings`).set(userSettings);
+    }
+    async function loadUserData(uid) {
+        showLoading();
         try {
-            const snapItems = await db.ref(`users/${uid}/items`).once('value'); 
-            items = snapItems.val() || []; 
-            if(!Array.isArray(items)) items = []; 
-            const snapSettings = await db.ref(`users/${uid}/settings`).once('value'); 
-            const settings = snapSettings.val(); 
-            if(settings) { userSettings = settings; if(userSettings.meta === undefined) userSettings.meta = 0; } 
-            else { userSettings = { meta: 0 }; } 
-            updateDescriptionDatalist(); 
-            updateMetaUI(); 
-            document.getElementById('syncStatus').textContent = `✅ ${items.length} itens carregados`; 
-            document.getElementById('syncStatus').classList.add('synced'); 
-            refreshAllUI(); 
+            const snapItems = await db.ref(`users/${uid}/items`).once('value');
+            items = snapItems.val() || [];
+            if (!Array.isArray(items)) items = [];
+            const snapSettings = await db.ref(`users/${uid}/settings`).once('value');
+            const settings = snapSettings.val();
+            if (settings) { userSettings = settings; if (userSettings.meta === undefined) userSettings.meta = 0; }
+            else { userSettings = { meta: 0 }; }
+            updateDescriptionDatalist();
+            updateMetaUI();
+            document.getElementById('syncStatus').textContent = `✅ ${items.length} itens carregados`;
+            document.getElementById('syncStatus').classList.add('synced');
+            refreshAllUI();
         } catch (error) {
-            console.error("Erro ao carregar dados:", error);
+            console.error(error);
             document.getElementById('syncStatus').textContent = '⚠️ Erro ao carregar dados';
         } finally {
             hideLoading();
         }
     }
 
-    // ========== AUTOCOMPLETE + SUGESTÃO DE VALOR ==========
+    // ========== AUTOCOMPLETE ==========
     function getDescriptionSuggestions() {
         const transactions = items.filter(i => i.type === 'income' || i.type === 'expense');
         const freq = new Map();
-        transactions.forEach(t => { const desc = t.title; freq.set(desc, (freq.get(desc) || 0) + 1); });
-        return Array.from(freq.entries()).sort((a,b)=>b[1]-a[1]).map(item=>item[0]).slice(0,10);
+        transactions.forEach(t => freq.set(t.title, (freq.get(t.title) || 0) + 1));
+        return Array.from(freq.entries()).sort((a, b) => b[1] - a[1]).map(item => item[0]).slice(0, 10);
     }
     function updateDescriptionDatalist() {
         const datalist = document.getElementById('descSuggestions');
-        if(!datalist) return;
+        if (!datalist) return;
         datalist.innerHTML = '';
-        getDescriptionSuggestions().forEach(desc => { const opt = document.createElement('option'); opt.value = desc; datalist.appendChild(opt); });
+        getDescriptionSuggestions().forEach(desc => {
+            const opt = document.createElement('option');
+            opt.value = desc;
+            datalist.appendChild(opt);
+        });
     }
     function suggestAmountByDescription(desc) {
-        if(!desc) return;
+        if (!desc) return;
         const matches = items.filter(i => (i.type === 'income' || i.type === 'expense') && i.title === desc);
-        if(matches.length === 0) return;
+        if (!matches.length) return;
         const freq = new Map();
-        matches.forEach(m => freq.set(m.amount, (freq.get(m.amount)||0)+1));
+        matches.forEach(m => freq.set(m.amount, (freq.get(m.amount) || 0) + 1));
         let mostFrequent = null, maxCount = 0;
-        for(let [amt, count] of freq.entries()) {
-            if(count > maxCount) { maxCount = count; mostFrequent = amt; }
+        for (let [amt, count] of freq) {
+            if (count > maxCount) { maxCount = count; mostFrequent = amt; }
         }
-        if(mostFrequent !== null) document.getElementById('amount').value = mostFrequent;
+        if (mostFrequent !== null) document.getElementById('amount').value = mostFrequent;
     }
 
     // ========== META ==========
     function updateMetaUI() {
         const meta = userSettings.meta || 0;
-        document.getElementById('metaValueDisplay').innerHTML = `R$ ${meta.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-        if(meta === 0) { 
-            document.getElementById('progressBar').style.width = '0%'; 
-            document.getElementById('metaStatus').innerHTML = 'Defina uma meta para começar'; 
-            return; 
+        document.getElementById('metaValueDisplay').innerHTML = `R$ ${meta.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        if (meta === 0) {
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('metaStatus').innerHTML = 'Defina uma meta para começar';
+            return;
         }
         const monthExpense = getMonthStats().expense;
         const percent = Math.min(100, (monthExpense / meta) * 100);
         document.getElementById('progressBar').style.width = `${percent}%`;
-        if(percent >= 100) document.getElementById('metaStatus').innerHTML = '⚠️ Atenção: gastos excederam a meta!';
+        if (percent >= 100) document.getElementById('metaStatus').innerHTML = '⚠️ Atenção: gastos excederam a meta!';
         else document.getElementById('metaStatus').innerHTML = `Gastos deste mês: ${percent.toFixed(0)}% da meta`;
     }
     function editMeta() { document.getElementById('metaModal').style.display = 'flex'; }
     function closeMetaModal() { document.getElementById('metaModal').style.display = 'none'; }
     function saveMeta() {
         let valor = parseFloat(document.getElementById('metaAmountInput').value);
-        if(isNaN(valor) || valor < 0) { alert('Digite um valor válido'); return; }
+        if (isNaN(valor) || valor < 0) { alert('Digite um valor válido'); return; }
         userSettings.meta = valor;
-        if(currentUser) saveToCloud();
+        if (currentUser) saveToCloud();
         updateMetaUI();
         closeMetaModal();
         alert(`Meta definida para R$ ${valor.toFixed(2)}`);
     }
 
-    // ========== DADOS ==========
-    function getItemsForDate(date) { 
+    // ========== DADOS (usando datas corretas) ==========
+    function getItemsForDate(date) {
         const key = formatDateKey(date);
-        return items.filter(i => i.date === key); 
+        return items.filter(i => i.date === key);
     }
-    function getFinancialItemsForDate(date) { 
+    function getFinancialItemsForDate(date) {
         const key = formatDateKey(date);
-        return items.filter(i => i.date === key && (i.type === 'income' || i.type === 'expense')); 
+        return items.filter(i => i.date === key && (i.type === 'income' || i.type === 'expense'));
     }
-    function getAppointmentsForDate(date) { 
+    function getAppointmentsForDate(date) {
         const key = formatDateKey(date);
-        return items.filter(i => i.date === key && i.type === 'appointment'); 
+        return items.filter(i => i.date === key && i.type === 'appointment');
     }
-    function getNotesForDate(date) { 
+    function getNotesForDate(date) {
         const key = formatDateKey(date);
-        return items.filter(i => i.date === key && i.type === 'note'); 
+        return items.filter(i => i.date === key && i.type === 'note');
     }
-    function getDaySummary(date) { 
-        let income=0, expense=0; 
-        getFinancialItemsForDate(date).forEach(i=>{ 
-            if(i.type==='income') income+=i.amount; 
-            if(i.type==='expense') expense+=i.amount; 
-        }); 
-        return { income, expense, balance: income-expense }; 
+    function getDaySummary(date) {
+        let income = 0, expense = 0;
+        getFinancialItemsForDate(date).forEach(i => {
+            if (i.type === 'income') income += i.amount;
+            if (i.type === 'expense') expense += i.amount;
+        });
+        return { income, expense, balance: income - expense };
     }
-    function getWeekBalance(date) { 
-        let income=0, expense=0, start=new Date(date); 
-        start.setDate(date.getDate()-date.getDay()); 
-        for(let i=0;i<7;i++){ 
-            let d=new Date(start); 
-            d.setDate(start.getDate()+i); 
-            getFinancialItemsForDate(d).forEach(i=>{ 
-                if(i.type==='income') income+=i.amount; 
-                if(i.type==='expense') expense+=i.amount; 
-            }); 
-        } 
-        return { balance: income-expense, income, expense }; 
+    function getWeekBalance(date) {
+        let income = 0, expense = 0, start = new Date(date);
+        start.setDate(date.getDate() - date.getDay());
+        for (let i = 0; i < 7; i++) {
+            let d = new Date(start);
+            d.setDate(start.getDate() + i);
+            getFinancialItemsForDate(d).forEach(item => {
+                if (item.type === 'income') income += item.amount;
+                if (item.type === 'expense') expense += item.amount;
+            });
+        }
+        return { balance: income - expense, income, expense };
     }
-    function getMonthStats() { 
-        let income=0, expense=0, today=new Date(); 
-        for(let d=1;d<=31;d++){ 
-            let date=new Date(today.getFullYear(),today.getMonth(),d); 
-            if(date.getMonth()!==today.getMonth()) break; 
-            getFinancialItemsForDate(date).forEach(i=>{ 
-                if(i.type==='income') income+=i.amount; 
-                if(i.type==='expense') expense+=i.amount; 
-            }); 
-        } 
-        return { income, expense, balance: income-expense }; 
+    function getMonthStats() {
+        let income = 0, expense = 0, today = new Date();
+        for (let d = 1; d <= 31; d++) {
+            let date = new Date(today.getFullYear(), today.getMonth(), d);
+            if (date.getMonth() !== today.getMonth()) break;
+            getFinancialItemsForDate(date).forEach(i => {
+                if (i.type === 'income') income += i.amount;
+                if (i.type === 'expense') expense += i.amount;
+            });
+        }
+        return { income, expense, balance: income - expense };
     }
 
     // ========== INSIGHTS ==========
     function generateInsightsHTML() {
         const monthStats = getMonthStats();
         const weekStats = getWeekBalance(new Date());
-        const pendingTransactions = items.filter(i => (i.type === 'income' || i.type === 'expense') && i.status === 'pending').length;
+        const pending = items.filter(i => (i.type === 'income' || i.type === 'expense') && i.status === 'pending').length;
         const highExpenses = items.filter(i => i.type === 'expense' && i.amount > 200).length;
         let insights = [];
-        if (monthStats.expense > monthStats.income) insights.push('⚠️ Você está gastando mais do que ganha este mês. Revise suas despesas.');
-        else if (monthStats.balance > 0 && monthStats.balance < 500) insights.push('💪 Continue economizando! Você tem saldo positivo neste mês.');
-        else if (monthStats.balance > 1000) insights.push('🎉 Parabéns! Seu saldo está ótimo. Considere investir o excedente.');
-        if (pendingTransactions > 0) insights.push(`⏳ Você tem ${pendingTransactions} transação(ões) pendente(s).`);
+        if (monthStats.expense > monthStats.income) insights.push('⚠️ Você está gastando mais do que ganha este mês.');
+        else if (monthStats.balance > 0 && monthStats.balance < 500) insights.push('💪 Continue economizando! Saldo positivo.');
+        else if (monthStats.balance > 1000) insights.push('🎉 Parabéns! Seu saldo está ótimo.');
+        if (pending > 0) insights.push(`⏳ Você tem ${pending} transação(ões) pendente(s).`);
         if (weekStats.balance < 0) insights.push(`📉 Nesta semana seu saldo está negativo (R$ ${Math.abs(weekStats.balance).toFixed(2)}).`);
         if (highExpenses > 3) insights.push(`💸 Você fez ${highExpenses} despesas acima de R$200 este mês.`);
-        if (items.length === 0) insights.push('👋 Comece adicionando suas receitas e despesas.');
-        if (insights.length === 0) insights.push('✅ Tudo em ordem! Continue gerenciando suas finanças.');
+        if (!items.length) insights.push('👋 Comece adicionando suas receitas e despesas.');
+        if (!insights.length) insights.push('✅ Tudo em ordem! Continue gerenciando.');
         return insights.map(ins => `<div class="insight-item">${ins}</div>`).join('');
     }
     function showInsightsModal() {
@@ -876,58 +894,79 @@
     }
     function closeInsightsModal() { document.getElementById('insightsModal').style.display = 'none'; }
 
-    // ========== RENDERIZAÇÃO ==========
+    // ========== RENDERIZAÇÃO DO CALENDÁRIO ==========
     function renderWeekCalendar() {
-        const today=new Date(), start=new Date(today); 
-        start.setDate(today.getDate()-today.getDay());
-        const weekDays=['DOM','SEG','TER','QUA','QUI','SEX','SÁB'], container=document.getElementById('weekDaysContainer'); 
-        container.innerHTML='';
-        for(let i=0;i<7;i++){ 
-            let d=new Date(start); 
-            d.setDate(start.getDate()+i); 
-            let summary=getDaySummary(d); 
-            let isToday=d.toDateString()===today.toDateString(); 
-            let chip=document.createElement('div'); 
-            chip.className=`day-chip ${isToday?'today':''}`; 
-            chip.onclick=()=>showDayModal(d); 
-            chip.innerHTML=`<div class="day-name">${weekDays[i]}</div><div class="day-number">${d.getDate()}</div><div class="day-amount ${summary.balance>=0?'amount-positive':'amount-negative'}">${summary.balance>=0?'+':'-'}R$ ${Math.abs(summary.balance).toFixed(2)}</div>`; 
-            container.appendChild(chip); 
+        const today = new Date(), start = new Date(today);
+        start.setDate(today.getDate() - today.getDay());
+        const weekDays = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+        const container = document.getElementById('weekDaysContainer');
+        container.innerHTML = '';
+        for (let i = 0; i < 7; i++) {
+            let d = new Date(start);
+            d.setDate(start.getDate() + i);
+            let summary = getDaySummary(d);
+            let isToday = d.toDateString() === today.toDateString();
+            let chip = document.createElement('div');
+            chip.className = `day-chip ${isToday ? 'today' : ''}`;
+            chip.onclick = () => showDayModal(d);
+            chip.innerHTML = `<div class="day-name">${weekDays[i]}</div><div class="day-number">${d.getDate()}</div><div class="day-amount ${summary.balance >= 0 ? 'amount-positive' : 'amount-negative'}">${summary.balance >= 0 ? '+' : '-'}R$ ${Math.abs(summary.balance).toFixed(2)}</div>`;
+            container.appendChild(chip);
         }
-        document.getElementById('currentMonthLabel').innerHTML=today.toLocaleDateString('pt-BR',{month:'short',year:'numeric'});
+        document.getElementById('currentMonthLabel').innerHTML = today.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
     }
     function renderMonthCalendar() {
-        const year=currentMonth.getFullYear(), month=currentMonth.getMonth(), firstDay=new Date(year,month,1), lastDay=new Date(year,month+1,0), startDay=firstDay.getDay(), totalDays=lastDay.getDate(), today=new Date(), weekDays=['D','S','T','Q','Q','S','S'];
-        document.getElementById('monthTitle').innerHTML=currentMonth.toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^./,l=>l.toUpperCase());
-        const grid=document.getElementById('monthGrid'); grid.innerHTML='';
-        weekDays.forEach(day=>{ let h=document.createElement('div'); h.className='weekday-header'; h.textContent=day; grid.appendChild(h); });
-        for(let i=0;i<startDay;i++){ let e=document.createElement('div'); e.className='month-day'; e.style.background='transparent'; e.style.cursor='default'; e.style.minHeight='55px'; grid.appendChild(e); }
-        for(let day=1;day<=totalDays;day++){ 
-            let d=new Date(year,month,day), dayItems=getItemsForDate(d); 
-            let income=0, expense=0, allPaid=true; 
-            dayItems.forEach(i=>{ 
-                if(i.type==='income') income+=i.amount; 
-                if(i.type==='expense') expense+=i.amount; 
-                if(i.status !== 'paid') allPaid=false; 
-            }); 
-            let isToday=d.toDateString()===today.toDateString(); 
-            let indicatorClass=''; 
-            if(income>0&&expense>0) indicatorClass='has-both'; 
-            else if(income>0) indicatorClass='has-income'; 
-            else if(expense>0) indicatorClass='has-expense';
+        const year = currentMonth.getFullYear(), month = currentMonth.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const startDay = firstDay.getDay();
+        const totalDays = lastDay.getDate();
+        const today = new Date();
+        const weekDays = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+        document.getElementById('monthTitle').innerHTML = currentMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).replace(/^./, l => l.toUpperCase());
+        const grid = document.getElementById('monthGrid');
+        grid.innerHTML = '';
+        weekDays.forEach(day => {
+            let h = document.createElement('div');
+            h.className = 'weekday-header';
+            h.textContent = day;
+            grid.appendChild(h);
+        });
+        for (let i = 0; i < startDay; i++) {
+            let e = document.createElement('div');
+            e.className = 'month-day';
+            e.style.background = 'transparent';
+            e.style.cursor = 'default';
+            e.style.minHeight = '55px';
+            grid.appendChild(e);
+        }
+        for (let day = 1; day <= totalDays; day++) {
+            let d = new Date(year, month, day);
+            let dayItems = getItemsForDate(d);
+            let income = 0, expense = 0, allPaid = true;
+            dayItems.forEach(i => {
+                if (i.type === 'income') income += i.amount;
+                if (i.type === 'expense') expense += i.amount;
+                if (i.status !== 'paid') allPaid = false;
+            });
+            let isToday = d.toDateString() === today.toDateString();
+            let indicatorClass = '';
+            if (income > 0 && expense > 0) indicatorClass = 'has-both';
+            else if (income > 0) indicatorClass = 'has-income';
+            else if (expense > 0) indicatorClass = 'has-expense';
             const hasAppointment = dayItems.some(i => i.type === 'appointment');
             const hasNote = dayItems.some(i => i.type === 'note');
             if (hasAppointment) indicatorClass += ' has-appointment';
             if (hasNote) indicatorClass += ' has-note';
-            let dayDiv=document.createElement('div'); 
-            dayDiv.className=`month-day ${isToday?'today':''} ${indicatorClass}`; 
-            let indicators=''; 
-            if(income>0) indicators+=`<span class="indicator-up ${allPaid?'paid':''}">↑${income.toFixed(0)}</span>`; 
-            if(expense>0) indicators+=`<span class="indicator-down ${allPaid?'paid':''}">↓${expense.toFixed(0)}</span>`;
+            let dayDiv = document.createElement('div');
+            dayDiv.className = `month-day ${isToday ? 'today' : ''} ${indicatorClass}`;
+            let indicators = '';
+            if (income > 0) indicators += `<span class="indicator-up ${allPaid ? 'paid' : ''}">↑${income.toFixed(0)}</span>`;
+            if (expense > 0) indicators += `<span class="indicator-down ${allPaid ? 'paid' : ''}">↓${expense.toFixed(0)}</span>`;
             if (hasAppointment) indicators += `<span class="indicator-appointment">📅</span>`;
             if (hasNote) indicators += `<span class="indicator-note">📝</span>`;
-            dayDiv.innerHTML=`<div class="day-number">${day}</div>${indicators?`<div class="day-indicators">${indicators}</div>`:''}`; 
-            dayDiv.onclick=()=>showDayModal(d); 
-            grid.appendChild(dayDiv); 
+            dayDiv.innerHTML = `<div class="day-number">${day}</div>${indicators ? `<div class="day-indicators">${indicators}</div>` : ''}`;
+            dayDiv.onclick = () => showDayModal(d);
+            grid.appendChild(dayDiv);
         }
     }
 
@@ -938,16 +977,15 @@
         document.getElementById('dayModalTitle').innerHTML = formatDateDisplay(date);
         const container = document.getElementById('dayModalContent');
         container.innerHTML = '';
-        
-        const financialItems = getFinancialItemsForDate(date);
+
+        const financials = getFinancialItemsForDate(date);
         const finDiv = document.createElement('div');
         finDiv.className = 'detail-section';
         finDiv.innerHTML = `<div class="detail-section-title">💰 Financeiro</div>`;
-        if(financialItems.length === 0) {
-            finDiv.innerHTML += '<div style="padding:16px; text-align:center; color:var(--text-gray);">Nenhuma transação financeira neste dia</div>';
-        } else {
-            financialItems.forEach(item => {
-                const globalIndex = items.findIndex(i => i.id === item.id);
+        if (!financials.length) finDiv.innerHTML += '<div style="padding:16px;text-align:center;color:var(--text-gray);">Nenhuma transação financeira</div>';
+        else {
+            financials.forEach(item => {
+                const index = items.findIndex(i => i.id === item.id);
                 const amountClass = item.type === 'expense' ? 'amount-negative' : 'amount-positive';
                 const signal = item.type === 'expense' ? '-' : '+';
                 const icon = item.type === 'expense' ? '💸' : '💰';
@@ -961,23 +999,22 @@
                     </div>
                     <div class="day-modal-amount ${amountClass}">${signal} R$ ${item.amount.toFixed(2)}</div>
                     <div class="day-modal-actions">
-                        <button class="edit-transaction-btn" data-index="${globalIndex}">✏️</button>
-                        <button class="delete-transaction-btn" data-index="${globalIndex}">🗑️</button>
-                        <button class="repeat-transaction-btn" data-index="${globalIndex}">↻</button>
+                        <button class="edit-trans-btn" data-index="${index}">✏️</button>
+                        <button class="del-trans-btn" data-index="${index}">🗑️</button>
+                        <button class="repeat-trans-btn" data-index="${index}">↻</button>
                     </div>
                 `;
                 finDiv.appendChild(div);
             });
         }
         container.appendChild(finDiv);
-        
+
         const appointments = getAppointmentsForDate(date);
         const appDiv = document.createElement('div');
         appDiv.className = 'detail-section';
         appDiv.innerHTML = `<div class="detail-section-title">📅 Compromissos</div>`;
-        if(appointments.length === 0) {
-            appDiv.innerHTML += '<div style="padding:16px; text-align:center; color:var(--text-gray);">Nenhum compromisso neste dia</div>';
-        } else {
+        if (!appointments.length) appDiv.innerHTML += '<div style="padding:16px;text-align:center;color:var(--text-gray);">Nenhum compromisso</div>';
+        else {
             appointments.forEach(app => {
                 const index = items.findIndex(i => i.id === app.id);
                 const div = document.createElement('div');
@@ -988,22 +1025,19 @@
                         <div class="day-modal-title">${escapeHtml(app.title)}</div>
                         <div class="day-modal-detail">${app.time ? `🕒 ${app.time}` : ''} ${app.location ? `📍 ${app.location}` : ''}</div>
                     </div>
-                    <div class="day-modal-actions">
-                        <button class="delete-appointment-btn" data-index="${index}">🗑️</button>
-                    </div>
+                    <div class="day-modal-actions"><button class="del-app-btn" data-index="${index}">🗑️</button></div>
                 `;
                 appDiv.appendChild(div);
             });
         }
         container.appendChild(appDiv);
-        
+
         const notes = getNotesForDate(date);
         const notesDiv = document.createElement('div');
         notesDiv.className = 'detail-section';
         notesDiv.innerHTML = `<div class="detail-section-title">📝 Anotações</div>`;
-        if(notes.length === 0) {
-            notesDiv.innerHTML += '<div style="padding:16px; text-align:center; color:var(--text-gray);">Nenhuma anotação neste dia</div>';
-        } else {
+        if (!notes.length) notesDiv.innerHTML += '<div style="padding:16px;text-align:center;color:var(--text-gray);">Nenhuma anotação</div>';
+        else {
             notes.forEach(note => {
                 const index = items.findIndex(i => i.id === note.id);
                 const div = document.createElement('div');
@@ -1012,36 +1046,34 @@
                     <div class="day-modal-icon">📝</div>
                     <div class="day-modal-info">
                         <div class="day-modal-title">${escapeHtml(note.title)}</div>
-                        <div class="day-modal-detail">${note.content ? escapeHtml(note.content.substring(0,100)) : ''}</div>
+                        <div class="day-modal-detail">${note.content ? escapeHtml(note.content.substring(0, 100)) : ''}</div>
                     </div>
-                    <div class="day-modal-actions">
-                        <button class="delete-note-btn" data-index="${index}">🗑️</button>
-                    </div>
+                    <div class="day-modal-actions"><button class="del-note-btn" data-index="${index}">🗑️</button></div>
                 `;
                 notesDiv.appendChild(div);
             });
         }
         container.appendChild(notesDiv);
-        
-        // Adicionar listeners para os botões dinâmicos
-        container.querySelectorAll('.edit-transaction-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => { editTransaction(parseInt(btn.dataset.index)); closeDayModal(); });
+
+        // listeners
+        container.querySelectorAll('.edit-trans-btn').forEach(btn => {
+            btn.addEventListener('click', () => { editTransaction(parseInt(btn.dataset.index)); closeDayModal(); });
         });
-        container.querySelectorAll('.delete-transaction-btn, .delete-appointment-btn, .delete-note-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => { deleteItem(parseInt(btn.dataset.index)); closeDayModal(); });
+        container.querySelectorAll('.del-trans-btn, .del-app-btn, .del-note-btn').forEach(btn => {
+            btn.addEventListener('click', () => { deleteItem(parseInt(btn.dataset.index)); closeDayModal(); });
         });
-        container.querySelectorAll('.repeat-transaction-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => { repeatTransaction(parseInt(btn.dataset.index)); closeDayModal(); });
+        container.querySelectorAll('.repeat-trans-btn').forEach(btn => {
+            btn.addEventListener('click', () => { repeatTransaction(parseInt(btn.dataset.index)); closeDayModal(); });
         });
-        
         document.getElementById('dayModal').style.display = 'flex';
     }
     function closeDayModal() { document.getElementById('dayModal').style.display = 'none'; currentModalDate = null; }
-    function openNewTransactionFromModal() { 
-        if(currentModalDate) openNewTransaction(currentModalDate); 
-        closeDayModal(); 
+    function openNewTransactionFromModal() {
+        if (currentModalDate) openNewTransaction(currentModalDate);
+        closeDayModal();
     }
-    
+
+    // ========== TRANSAÇÕES (EDIÇÃO, REPETIÇÃO, CRIAÇÃO) ==========
     function repeatTransaction(index) {
         const original = items[index];
         if (!original) return;
@@ -1054,12 +1086,11 @@
         document.getElementById('status').value = original.status || 'pending';
         document.getElementById('modalTitle').innerHTML = 'Repetir transação';
     }
-    
-    function editTransaction(index) { 
-        const item = items[index]; 
-        if(!item) return;
+    function editTransaction(index) {
+        const item = items[index];
+        if (!item) return;
         editingItemId = item.id;
-        const editDate = new Date(item.date);
+        const editDate = parseLocalDate(item.date); // usar a data já armazenada
         openModalWithDate(editDate, 'financial');
         document.getElementById('type').value = item.type;
         document.getElementById('description').value = item.title;
@@ -1067,12 +1098,10 @@
         document.getElementById('status').value = item.status || 'pending';
         document.getElementById('modalTitle').innerHTML = 'Editar transação';
     }
-    
     function openModalWithDate(date, tab = 'financial') {
         const dateStr = formatDateKey(date);
         document.getElementById('modalDateInfo').innerHTML = `<div class="date-selector"><span>📅 Data:</span><input type="date" id="transactionDate" value="${dateStr}"></div>`;
         document.getElementById('modal').style.display = 'flex';
-        // ativar a aba correta
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         if (tab === 'financial') {
@@ -1086,8 +1115,7 @@
             document.getElementById('noteTab').classList.add('active');
         }
     }
-    
-    function openNewTransaction(date, presetType = null) { 
+    function openNewTransaction(date, presetType = null) {
         editingItemId = null;
         const targetDate = date || new Date();
         openModalWithDate(targetDate, 'financial');
@@ -1095,44 +1123,43 @@
         if (presetType) document.getElementById('type').value = presetType;
         document.getElementById('modalTitle').innerHTML = 'Nova transação';
         const descInput = document.getElementById('description');
-        descInput.oninput = function() { suggestAmountByDescription(this.value); };
+        descInput.oninput = function () { suggestAmountByDescription(this.value); };
     }
-    
     function getSelectedDateFromModal() {
         const dateInput = document.getElementById('transactionDate');
         if (dateInput && dateInput.value) {
-            return new Date(dateInput.value);
+            // CORREÇÃO: usar parseLocalDate para evitar deslocamento de fuso
+            return parseLocalDate(dateInput.value);
         }
         return new Date();
     }
-    
-    function updateBalances() { 
-        let week=getWeekBalance(new Date()), month=getMonthStats(); 
-        document.getElementById('mainBalance').innerHTML=`R$ ${month.balance.toLocaleString('pt-BR',{minimumFractionDigits:2})}`; 
-        document.getElementById('monthIncome').innerHTML=`R$ ${month.income.toLocaleString('pt-BR',{minimumFractionDigits:2})}`; 
-        document.getElementById('monthExpense').innerHTML=`R$ ${month.expense.toLocaleString('pt-BR',{minimumFractionDigits:2})}`; 
-        document.getElementById('weekIncome').innerHTML=`R$ ${week.income.toLocaleString('pt-BR',{minimumFractionDigits:2})}`; 
-        document.getElementById('weekExpense').innerHTML=`R$ ${week.expense.toLocaleString('pt-BR',{minimumFractionDigits:2})}`; 
-        document.getElementById('totalExpense').innerHTML=`R$ ${week.expense.toFixed(2)}`; 
-        document.getElementById('totalIncome').innerHTML=`R$ ${week.income.toFixed(2)}`; 
-        document.getElementById('totalBalance').innerHTML=`R$ ${week.balance.toFixed(2)}`; 
-        updateMetaUI(); 
+    function updateBalances() {
+        let week = getWeekBalance(new Date()), month = getMonthStats();
+        document.getElementById('mainBalance').innerHTML = `R$ ${month.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        document.getElementById('monthIncome').innerHTML = `R$ ${month.income.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        document.getElementById('monthExpense').innerHTML = `R$ ${month.expense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        document.getElementById('weekIncome').innerHTML = `R$ ${week.income.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        document.getElementById('weekExpense').innerHTML = `R$ ${week.expense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        document.getElementById('totalExpense').innerHTML = `R$ ${week.expense.toFixed(2)}`;
+        document.getElementById('totalIncome').innerHTML = `R$ ${week.income.toFixed(2)}`;
+        document.getElementById('totalBalance').innerHTML = `R$ ${week.balance.toFixed(2)}`;
+        updateMetaUI();
     }
     function refreshAllUI() { renderWeekCalendar(); renderMonthCalendar(); updateBalances(); updateDescriptionDatalist(); }
-    function saveData() { refreshAllUI(); if(currentUser) saveToCloud(); }
-    function closeModal() { document.getElementById('modal').style.display='none'; editingItemId=null; refreshAllUI(); }
-    function deleteItem(index) { 
-        if(confirm('⚠️ Tem certeza que deseja EXCLUIR esta transação?')){ 
-            items.splice(index,1); 
-            saveData(); 
-        } 
+    function saveData() { refreshAllUI(); if (currentUser) saveToCloud(); }
+    function closeModal() { document.getElementById('modal').style.display = 'none'; editingItemId = null; refreshAllUI(); }
+    function deleteItem(index) {
+        if (confirm('⚠️ Tem certeza que deseja EXCLUIR esta transação?')) {
+            items.splice(index, 1);
+            saveData();
+        }
     }
-    function escapeHtml(str) { 
-        if(!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if(m === '&') return '&amp;';
-            if(m === '<') return '&lt;';
-            if(m === '>') return '&gt;';
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function (m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
             return m;
         });
     }
@@ -1140,156 +1167,148 @@
     // ========== RELATÓRIOS ==========
     function openFullReport() {
         const week = getWeekBalance(new Date()), month = getMonthStats();
-        const allItems = items.filter(i => i.type === 'income' || i.type === 'expense');
-        let totalGeral = 0; allItems.forEach(i => { if(i.type === 'income') totalGeral += i.amount; if(i.type === 'expense') totalGeral -= i.amount; });
-        const transacoesReceita = allItems.filter(i => i.type === 'income').length;
-        const transacoesDespesa = allItems.filter(i => i.type === 'expense').length;
-        document.getElementById('reportModalContent').innerHTML = `<div><strong>📊 RESUMO COMPLETO</strong><br><br><div style="background:#f0fdf4;padding:12px;border-radius:16px;margin-bottom:16px"><strong>💰 SALDO TOTAL</strong><br><span style="font-size:1.8rem;font-weight:800;color:${totalGeral>=0?'#10b981':'#ef4444'}">${totalGeral>=0?'+':'-'} R$ ${Math.abs(totalGeral).toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div><div style="display:flex;gap:12px;margin-bottom:16px"><div style="flex:1;background:#f0fdf4;padding:12px;border-radius:16px;text-align:center"><div>🟢 RECEITAS</div><div style="font-size:1.2rem;font-weight:700">R$ ${month.income.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div><div>${transacoesReceita} transações</div></div><div style="flex:1;background:#fef2f2;padding:12px;border-radius:16px;text-align:center"><div>🔴 DESPESAS</div><div style="font-size:1.2rem;font-weight:700">R$ ${month.expense.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div><div>${transacoesDespesa} transações</div></div></div><div style="background:#f3f4f6;padding:12px;border-radius:16px;margin-bottom:16px"><strong>📆 ESTA SEMANA</strong><br>🟢 Receitas: R$ ${week.income.toFixed(2)}<br>🔴 Despesas: R$ ${week.expense.toFixed(2)}<br>💰 Saldo: ${week.balance>=0?'+':'-'} R$ ${Math.abs(week.balance).toFixed(2)}</div><div style="background:#f3f4f6;padding:12px;border-radius:16px"><strong>📅 ESTE MÊS</strong><br>🟢 Receitas: R$ ${month.income.toFixed(2)}<br>🔴 Despesas: R$ ${month.expense.toFixed(2)}<br>💰 Saldo: ${month.balance>=0?'+':'-'} R$ ${Math.abs(month.balance).toFixed(2)}</div></div>`;
+        const all = items.filter(i => i.type === 'income' || i.type === 'expense');
+        let total = 0; all.forEach(i => { if (i.type === 'income') total += i.amount; else total -= i.amount; });
+        const recCount = all.filter(i => i.type === 'income').length;
+        const desCount = all.filter(i => i.type === 'expense').length;
+        const html = `<div><strong>📊 RESUMO COMPLETO</strong><br><br>
+            <div style="background:#f0fdf4;padding:12px;border-radius:16px;margin-bottom:16px">
+                <strong>💰 SALDO TOTAL</strong><br>
+                <span style="font-size:1.8rem;font-weight:800;color:${total >= 0 ? '#10b981' : '#ef4444'}">${total >= 0 ? '+' : '-'} R$ ${Math.abs(total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+            </div>
+            <div style="display:flex;gap:12px;margin-bottom:16px">
+                <div style="flex:1;background:#f0fdf4;padding:12px;border-radius:16px;text-align:center">
+                    <div>🟢 RECEITAS</div><div style="font-size:1.2rem;font-weight:700">R$ ${month.income.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div><div>${recCount} transações</div>
+                </div>
+                <div style="flex:1;background:#fef2f2;padding:12px;border-radius:16px;text-align:center">
+                    <div>🔴 DESPESAS</div><div style="font-size:1.2rem;font-weight:700">R$ ${month.expense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div><div>${desCount} transações</div>
+                </div>
+            </div>
+            <div style="background:#f3f4f6;padding:12px;border-radius:16px;margin-bottom:16px">
+                <strong>📆 ESTA SEMANA</strong><br>🟢 Receitas: R$ ${week.income.toFixed(2)}<br>🔴 Despesas: R$ ${week.expense.toFixed(2)}<br>💰 Saldo: ${week.balance >= 0 ? '+' : '-'} R$ ${Math.abs(week.balance).toFixed(2)}
+            </div>
+            <div style="background:#f3f4f6;padding:12px;border-radius:16px">
+                <strong>📅 ESTE MÊS</strong><br>🟢 Receitas: R$ ${month.income.toFixed(2)}<br>🔴 Despesas: R$ ${month.expense.toFixed(2)}<br>💰 Saldo: ${month.balance >= 0 ? '+' : '-'} R$ ${Math.abs(month.balance).toFixed(2)}
+            </div></div>`;
+        document.getElementById('reportModalContent').innerHTML = html;
         document.getElementById('reportModal').style.display = 'flex';
     }
-    function generateWeeklyReport() { 
-        const week=getWeekBalance(new Date()); 
-        document.getElementById('reportModalContent').innerHTML = `<strong>📊 RELATÓRIO DA SEMANA</strong><br><br>📅 Período: ${getWeekRange()}<br>🟢 Receitas: R$ ${week.income.toFixed(2)}<br>🔴 Despesas: R$ ${week.expense.toFixed(2)}<br>💰 Saldo: ${week.balance>=0?'+':'-'} R$ ${Math.abs(week.balance).toFixed(2)}`; 
-        document.getElementById('reportModal').style.display='flex'; 
+    function generateWeeklyReport() {
+        const week = getWeekBalance(new Date());
+        document.getElementById('reportModalContent').innerHTML = `<strong>📊 RELATÓRIO DA SEMANA</strong><br><br>📅 Período: ${getWeekRange()}<br>🟢 Receitas: R$ ${week.income.toFixed(2)}<br>🔴 Despesas: R$ ${week.expense.toFixed(2)}<br>💰 Saldo: ${week.balance >= 0 ? '+' : '-'} R$ ${Math.abs(week.balance).toFixed(2)}`;
+        document.getElementById('reportModal').style.display = 'flex';
     }
-    function generateMonthlyReport() { 
-        const month=getMonthStats(); 
-        document.getElementById('reportModalContent').innerHTML = `<strong>📅 RELATÓRIO DO MÊS</strong><br><br>📆 ${new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}<br>🟢 Receitas: R$ ${month.income.toFixed(2)}<br>🔴 Despesas: R$ ${month.expense.toFixed(2)}<br>💰 Saldo: ${month.balance>=0?'+':'-'} R$ ${Math.abs(month.balance).toFixed(2)}`; 
-        document.getElementById('reportModal').style.display='flex'; 
+    function generateMonthlyReport() {
+        const month = getMonthStats();
+        document.getElementById('reportModalContent').innerHTML = `<strong>📅 RELATÓRIO DO MÊS</strong><br><br>📆 ${new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}<br>🟢 Receitas: R$ ${month.income.toFixed(2)}<br>🔴 Despesas: R$ ${month.expense.toFixed(2)}<br>💰 Saldo: ${month.balance >= 0 ? '+' : '-'} R$ ${Math.abs(month.balance).toFixed(2)}`;
+        document.getElementById('reportModal').style.display = 'flex';
     }
-    function closeReportModal() { document.getElementById('reportModal').style.display='none'; }
-    function prevMonth() { currentMonth.setMonth(currentMonth.getMonth()-1); renderMonthCalendar(); }
-    function nextMonth() { currentMonth.setMonth(currentMonth.getMonth()+1); renderMonthCalendar(); }
+    function closeReportModal() { document.getElementById('reportModal').style.display = 'none'; }
+    function prevMonth() { currentMonth.setMonth(currentMonth.getMonth() - 1); renderMonthCalendar(); }
+    function nextMonth() { currentMonth.setMonth(currentMonth.getMonth() + 1); renderMonthCalendar(); }
 
-    // ========== AUTENTICAÇÃO CORRIGIDA ==========
-    async function login() { 
+    // ========== AUTENTICAÇÃO ==========
+    async function login() {
         const email = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
-        if(!email || !password){ 
-            alert('📧 Preencha email e senha'); 
-            return; 
-        }
-        showLoading(); 
-        try{ 
-            await auth.signInWithEmailAndPassword(email,password); 
-            alert('✅ Login realizado!'); 
-            // Limpa os campos
+        if (!email || !password) { alert('📧 Preencha email e senha'); return; }
+        showLoading();
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+            alert('✅ Login realizado!');
             document.getElementById('loginEmail').value = '';
             document.getElementById('loginPassword').value = '';
-        } catch(error){ 
+        } catch (error) {
             let msg = '';
-            switch(error.code){
+            switch (error.code) {
                 case 'auth/user-not-found': msg = '❌ Usuário não encontrado. Crie uma conta.'; break;
                 case 'auth/wrong-password': msg = '❌ Senha incorreta.'; break;
                 case 'auth/invalid-email': msg = '❌ Email inválido.'; break;
                 default: msg = '❌ Erro: ' + error.message;
             }
             alert(msg);
-        } finally{ 
-            hideLoading(); 
-        } 
+        } finally { hideLoading(); }
     }
-    
-    async function signup() { 
+    async function signup() {
         const email = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
-        if(!email){ 
-            alert('📧 Digite seu email'); 
-            return; 
-        }
-        if(password.length < 6){ 
-            alert('❌ Senha deve ter pelo menos 6 caracteres'); 
-            return; 
-        }
-        showLoading(); 
-        try{ 
-            await auth.createUserWithEmailAndPassword(email,password); 
-            alert('✅ Conta criada! Agora faça login com os mesmos dados.'); 
-            document.getElementById('loginPassword').value = ''; 
-        } catch(error){ 
-            let msg = '';
-            if(error.code === 'auth/email-already-in-use') msg = '❌ Email já cadastrado. Faça login.';
-            else msg = '❌ Erro: ' + error.message;
+        if (!email) { alert('📧 Digite seu email'); return; }
+        if (password.length < 6) { alert('❌ Senha deve ter pelo menos 6 caracteres'); return; }
+        showLoading();
+        try {
+            await auth.createUserWithEmailAndPassword(email, password);
+            alert('✅ Conta criada! Agora faça login.');
+            document.getElementById('loginPassword').value = '';
+        } catch (error) {
+            let msg = error.code === 'auth/email-already-in-use' ? '❌ Email já cadastrado.' : '❌ Erro: ' + error.message;
             alert(msg);
-        } finally{ 
-            hideLoading(); 
-        } 
+        } finally { hideLoading(); }
     }
-    
-    async function logout() { 
-        showLoading(); 
-        try{ 
-            await auth.signOut(); 
-        } catch(e){ 
-            alert(e.message); 
-        } finally{ 
-            hideLoading(); 
-        } 
+    async function logout() {
+        showLoading();
+        try { await auth.signOut(); } catch (e) { alert(e.message); }
+        finally { hideLoading(); }
     }
 
-    // ========== SUBMITS ==========
-    document.getElementById('financialForm').addEventListener('submit',(e)=>{ 
-        e.preventDefault(); 
+    // ========== EVENTOS ==========
+    document.getElementById('financialForm').addEventListener('submit', (e) => {
+        e.preventDefault();
         const selectedDate = getSelectedDateFromModal();
-        const newTransaction = { 
-            id: editingItemId || Date.now(), 
-            type: document.getElementById('type').value, 
-            title: document.getElementById('description').value, 
-            amount: parseFloat(document.getElementById('amount').value), 
-            status: document.getElementById('status').value, 
+        const newTransaction = {
+            id: editingItemId || Date.now(),
+            type: document.getElementById('type').value,
+            title: document.getElementById('description').value,
+            amount: parseFloat(document.getElementById('amount').value),
+            status: document.getElementById('status').value,
             date: formatDateKey(selectedDate)
         };
-        if(editingItemId){ 
-            const idx = items.findIndex(i=>i.id===editingItemId); 
-            if(idx!==-1) items[idx]=newTransaction; 
-            else items.push(newTransaction); 
-        } else { 
-            items.push(newTransaction); 
+        if (editingItemId) {
+            const idx = items.findIndex(i => i.id === editingItemId);
+            if (idx !== -1) items[idx] = newTransaction;
+            else items.push(newTransaction);
+        } else {
+            items.push(newTransaction);
         }
-        saveData(); 
-        closeModal(); 
+        saveData();
+        closeModal();
     });
-    
-    document.getElementById('appointmentForm').addEventListener('submit',(e)=>{ 
-        e.preventDefault(); 
+    document.getElementById('appointmentForm').addEventListener('submit', (e) => {
+        e.preventDefault();
         const selectedDate = getSelectedDateFromModal();
-        items.push({ 
-            id: Date.now(), 
-            type: 'appointment', 
-            title: document.getElementById('appointmentTitle').value, 
-            time: document.getElementById('appointmentTime').value, 
-            location: document.getElementById('appointmentLocation').value, 
+        items.push({
+            id: Date.now(),
+            type: 'appointment',
+            title: document.getElementById('appointmentTitle').value,
+            time: document.getElementById('appointmentTime').value,
+            location: document.getElementById('appointmentLocation').value,
             date: formatDateKey(selectedDate)
-        }); 
-        saveData(); 
-        closeModal(); 
+        });
+        saveData();
+        closeModal();
     });
-    
-    document.getElementById('noteForm').addEventListener('submit',(e)=>{ 
-        e.preventDefault(); 
+    document.getElementById('noteForm').addEventListener('submit', (e) => {
+        e.preventDefault();
         const selectedDate = getSelectedDateFromModal();
-        items.push({ 
-            id: Date.now(), 
-            type: 'note', 
-            title: document.getElementById('noteTitle').value, 
-            content: document.getElementById('noteContent').value, 
+        items.push({
+            id: Date.now(),
+            type: 'note',
+            title: document.getElementById('noteTitle').value,
+            content: document.getElementById('noteContent').value,
             date: formatDateKey(selectedDate)
-        }); 
-        saveData(); 
-        closeModal(); 
+        });
+        saveData();
+        closeModal();
     });
 
-    // ========== EVENTOS DE UI ==========
-    document.querySelectorAll('.tab-btn').forEach(btn=>{ 
-        btn.addEventListener('click',function(){ 
-            document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); 
-            this.classList.add('active'); 
-            document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); 
-            document.getElementById(this.dataset.tab+'Tab').classList.add('active'); 
-        }); 
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(this.dataset.tab + 'Tab').classList.add('active');
+        });
     });
-    
-    // Fechar modais com botões específicos
+
     document.getElementById('closeModalBtn')?.addEventListener('click', closeModal);
     document.getElementById('cancelModalBtn')?.addEventListener('click', closeModal);
     document.getElementById('cancelAppointmentBtn')?.addEventListener('click', closeModal);
@@ -1301,12 +1320,8 @@
     document.getElementById('saveMetaBtn')?.addEventListener('click', saveMeta);
     document.getElementById('editMetaBtn')?.addEventListener('click', editMeta);
     document.getElementById('addTransactionFromDayBtn')?.addEventListener('click', openNewTransactionFromModal);
-    
-    // Navegação mês
     document.getElementById('prevMonthBtn')?.addEventListener('click', prevMonth);
     document.getElementById('nextMonthBtn')?.addEventListener('click', nextMonth);
-    
-    // Atalhos
     document.querySelectorAll('.shortcut-item').forEach(item => {
         item.addEventListener('click', () => {
             const action = item.dataset.action;
@@ -1317,72 +1332,59 @@
             else if (action === 'monthReport') generateMonthlyReport();
         });
     });
-    
     document.getElementById('desktopFabBtn')?.addEventListener('click', () => openNewTransaction(new Date()));
     document.getElementById('fabBtn')?.addEventListener('click', () => openNewTransaction(new Date()));
-    
-    // Modo escuro
-    const darkModeToggle = document.getElementById('darkModeToggle');
-    if(darkModeToggle) {
-        if(localStorage.getItem('darkMode') === 'enabled') { 
-            document.body.classList.add('dark-mode'); 
-            darkModeToggle.textContent = '☀️ Modo claro'; 
-        } else { 
-            darkModeToggle.textContent = '🌙 Modo escuro'; 
-        }
-        darkModeToggle.addEventListener('click', () => { 
-            document.body.classList.toggle('dark-mode'); 
-            const isDark = document.body.classList.contains('dark-mode'); 
-            localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled'); 
-            darkModeToggle.textContent = isDark ? '☀️ Modo claro' : '🌙 Modo escuro'; 
-        });
-    }
-    
-    // Lâmpada insights
     document.getElementById('insightsLamp')?.addEventListener('click', showInsightsModal);
-    
-    // Login com Enter
-    const loginEmailField = document.getElementById('loginEmail');
-    const loginPasswordField = document.getElementById('loginPassword');
-    function handleLoginEnter(e) { if(e.key === 'Enter') login(); }
-    if(loginEmailField) loginEmailField.addEventListener('keypress', handleLoginEnter);
-    if(loginPasswordField) loginPasswordField.addEventListener('keypress', handleLoginEnter);
-    
-    // Botões de login e cadastro
     document.getElementById('loginBtn')?.addEventListener('click', login);
     document.getElementById('signupBtn')?.addEventListener('click', signup);
     document.getElementById('logoutBtn')?.addEventListener('click', logout);
-    
-    // Fechar modais clicando fora
+    const loginEmailField = document.getElementById('loginEmail');
+    const loginPasswordField = document.getElementById('loginPassword');
+    function handleLoginEnter(e) { if (e.key === 'Enter') login(); }
+    loginEmailField?.addEventListener('keypress', handleLoginEnter);
+    loginPasswordField?.addEventListener('keypress', handleLoginEnter);
+
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    if (darkModeToggle) {
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.textContent = '☀️ Modo claro';
+        } else darkModeToggle.textContent = '🌙 Modo escuro';
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+            darkModeToggle.textContent = isDark ? '☀️ Modo claro' : '🌙 Modo escuro';
+        });
+    }
+
     window.onclick = (e) => {
-        if(e.target === document.getElementById('modal')) closeModal();
-        if(e.target === document.getElementById('reportModal')) closeReportModal();
-        if(e.target === document.getElementById('metaModal')) closeMetaModal();
-        if(e.target === document.getElementById('dayModal')) closeDayModal();
-        if(e.target === document.getElementById('insightsModal')) closeInsightsModal();
+        if (e.target === document.getElementById('modal')) closeModal();
+        if (e.target === document.getElementById('reportModal')) closeReportModal();
+        if (e.target === document.getElementById('metaModal')) closeMetaModal();
+        if (e.target === document.getElementById('dayModal')) closeDayModal();
+        if (e.target === document.getElementById('insightsModal')) closeInsightsModal();
     };
-    
-    // Observador de autenticação
-    auth.onAuthStateChanged(async (user) => { 
-        if(user){ 
-            currentUser = user; 
-            document.getElementById('authSection').style.display = 'none'; 
-            document.getElementById('userInfo').style.display = 'flex'; 
-            document.getElementById('userEmail').textContent = user.email; 
-            await loadUserData(user.uid); 
-        } else { 
-            currentUser = null; 
-            items = []; 
-            userSettings = { meta: 0 }; 
-            document.getElementById('authSection').style.display = 'flex'; 
-            document.getElementById('userInfo').style.display = 'none'; 
-            document.getElementById('syncStatus').textContent = '🔐 Faça login para salvar'; 
-            document.getElementById('syncStatus').classList.remove('synced'); 
-            refreshAllUI(); 
-        } 
+
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            currentUser = user;
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'flex';
+            document.getElementById('userEmail').textContent = user.email;
+            await loadUserData(user.uid);
+        } else {
+            currentUser = null;
+            items = [];
+            userSettings = { meta: 0 };
+            document.getElementById('authSection').style.display = 'flex';
+            document.getElementById('userInfo').style.display = 'none';
+            document.getElementById('syncStatus').textContent = '🔐 Faça login para salvar';
+            document.getElementById('syncStatus').classList.remove('synced');
+            refreshAllUI();
+        }
     });
-    
-    // Inicialização
+
     refreshAllUI();
 </script>
 </body>
