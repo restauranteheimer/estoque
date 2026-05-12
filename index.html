@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-    <title>Dinheiro em Dia</title>
+    <title>Dinheiro em Dia - IA e Gestos</title>
     <!-- Bibliotecas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -34,7 +34,7 @@
             --danger: #ef4444;
         }
 
-        /* Tema escuro (fundo totalmente preto/cinza escuro) */
+        /* Tema escuro */
         body.dark-mode {
             --primary: #a78bfa;
             --primary-dark: #8b5cf6;
@@ -70,7 +70,54 @@
             padding: 0 0 80px 0;
         }
 
-        @media (min-width: 900px) {
+        /* Layout adaptativo para telas muito pequenas (até 480px) */
+        @media (max-width: 480px) {
+            .dashboard-grid {
+                padding-bottom: 70px;
+            }
+            .balance-card, .meta-card, .shortcuts, .week-scroll, .month-card, .week-summary, .contacts-card {
+                margin: 8px;
+                padding: 12px;
+                border-radius: 20px;
+            }
+            .main-balance {
+                font-size: 1.8rem;
+            }
+            .month-day {
+                font-size: 0.65rem;
+                min-height: 45px;
+                padding: 4px 2px;
+            }
+            .day-indicators {
+                font-size: 0.5rem;
+                gap: 2px;
+            }
+            .shortcut-item {
+                padding: 8px 4px;
+                font-size: 0.7rem;
+            }
+            .week-summary .summary-value {
+                font-size: 0.75rem;
+            }
+            .header {
+                padding: 12px 12px;
+            }
+            .logo h1 {
+                font-size: 1.2rem;
+            }
+            .contacts-card .contact-item {
+                flex-wrap: wrap;
+            }
+            .fab {
+                width: 50px;
+                height: 50px;
+                bottom: 15px;
+                right: 15px;
+                font-size: 22px;
+            }
+        }
+
+        @media (min-width: 901px) {
             .dashboard-grid {
                 display: grid;
                 grid-template-columns: 1fr 380px;
@@ -81,7 +128,7 @@
             .desktop-fab { display: block; }
         }
 
-        @media (max-width: 899px) {
+        @media (max-width: 900px) {
             .desktop-fab { display: none; }
         }
 
@@ -185,7 +232,7 @@
         }
 
         /* Cards */
-        .balance-card, .meta-card, .shortcuts, .week-scroll, .month-card, .week-summary, .contacts-card {
+        .balance-card, .meta-card, .shortcuts, .week-scroll, .month-card, .week-summary, .contacts-card, .prediction-card {
             background: var(--card-bg);
             margin: 16px;
             border-radius: 24px;
@@ -193,7 +240,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         @media (min-width: 900px) {
-            .balance-card, .meta-card, .week-summary, .contacts-card {
+            .balance-card, .meta-card, .week-summary, .contacts-card, .prediction-card {
                 margin: 0 0 20px 0;
             }
         }
@@ -243,6 +290,7 @@
             cursor: pointer;
             border: 1px solid var(--border);
             transition: 0.1s;
+            user-select: none;
         }
         .shortcut-item:active { transform: scale(0.96); }
 
@@ -615,25 +663,54 @@
         #map { height: 300px; width: 100%; border-radius: 16px; margin-bottom: 12px; }
         .address-search { display: flex; gap: 8px; margin-bottom: 12px; }
 
-        /* Ajustes modo escuro adicionais */
-        body.dark-mode .modal-content,
-        body.dark-mode .report-modal-content {
-            background: #1e1e1e;
+        /* Estilos para previsão IA */
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
         }
-        body.dark-mode .day-chip,
-        body.dark-mode .month-day,
-        body.dark-mode .shortcut-item,
-        body.dark-mode .summary-item {
-            background: #2a2a2a;
+        .prediction-badge {
+            background: var(--primary-light);
+            padding: 4px 8px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--primary);
         }
-        body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
-            background: #333;
-            color: white;
-            border-color: #444;
+        .prediction-alert {
+            padding: 10px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            font-size: 0.8rem;
         }
-        body.dark-mode .btn-cancel {
-            background: #333;
-            color: white;
+        .prediction-alert.critical { background: rgba(239,68,68,0.2); border-left: 4px solid var(--danger); }
+        .prediction-alert.warning { background: rgba(245,158,11,0.2); border-left: 4px solid #f59e0b; }
+        .prediction-alert.ok { background: rgba(16,185,129,0.2); border-left: 4px solid var(--success); }
+        .prediction-days {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 8px 0;
+        }
+        .prediction-day-item {
+            min-width: 70px;
+            background: var(--background);
+            border-radius: 16px;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.7rem;
+        }
+        .suggestion-btn {
+            width: 100%;
+            margin-top: 12px;
+            background: var(--primary-soft);
+            border: none;
+            padding: 8px;
+            border-radius: 40px;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -641,7 +718,7 @@
 <div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div></div>
 <div class="app-container">
     <div class="header">
-        <div class="logo"><h1>💰 dinheiro em dia</h1><p>Planejamento financeiro</p></div>
+        <div class="logo"><h1>💰 dinheiro em dia</h1><p>Planejamento financeiro + IA</p></div>
         <div class="header-actions">
             <button id="darkModeToggle" class="dark-mode-toggle">🌙 Modo escuro</button>
             <button id="insightsLamp" class="insights-lamp" title="Dicas e insights">💡</button>
@@ -715,6 +792,18 @@
 
             <button class="desktop-fab" id="desktopFabBtn">➕ Nova transação</button>
 
+            <!-- Card de Previsão IA -->
+            <div class="prediction-card" id="predictionCard">
+                <div class="prediction-header">
+                    <span>🧠 Previsão IA (Ciclos)</span>
+                    <span class="prediction-badge" id="predictionBadge">Analisando...</span>
+                </div>
+                <div id="predictionContent">
+                    <div style="text-align: center; padding: 12px;">Carregando dados...</div>
+                </div>
+                <button id="applyAiSuggestionBtn" class="suggestion-btn">✨ Aplicar sugestão de economia</button>
+            </div>
+
             <div class="contacts-card">
                 <div class="insights-header">📞 Contatos favoritos (WhatsApp)</div>
                 <div id="contactsList" style="max-height: 200px; overflow-y: auto;"></div>
@@ -777,7 +866,7 @@
     </div>
 </div>
 
-<!-- Modal de Detalhe do Dia com seleção múltipla -->
+<!-- Modal de Detalhe do Dia -->
 <div id="dayModal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h3 id="dayModalTitle">Detalhes do dia</h3><button class="close-modal" id="closeDayModalBtn">Fechar</button></div>
@@ -807,15 +896,31 @@
     </div>
 </div>
 
-<!-- Modal de WhatsApp -->
-<div id="whatsappModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header"><h3>📲 Enviar via WhatsApp</h3><button class="close-modal" id="closeWhatsappModalBtn">Fechar</button></div>
-        <div style="padding:20px;">
-            <p id="whatsappMessagePreview" style="background:var(--primary-soft); padding:12px; border-radius:12px; margin-bottom:12px;"></p>
-            <div class="form-group"><label>Contato favorito</label><select id="contactSelect"><option value="">-- Escolher --</option></select></div>
-            <div class="form-group"><label>Ou digite o número (com DDI, ex: 5511999999999)</label><input type="tel" id="manualPhone" placeholder="5511999999999"></div>
-            <button id="sendWhatsappBtn" class="btn-save">Enviar mensagem</button>
+<!-- Modal WhatsApp corrigido -->
+<div id="whatsappModal" class="modal" style="z-index: 9999;">
+    <div class="modal-content" style="pointer-events: auto; max-width: 400px;">
+        <div class="modal-header">
+            <h3>📲 Enviar via WhatsApp</h3>
+            <button class="close-modal" id="closeWhatsappModalBtn" style="cursor: pointer;">Fechar</button>
+        </div>
+        <div style="padding: 20px;">
+            <p id="whatsappMessagePreview" style="background: var(--primary-soft); padding: 12px; border-radius: 12px; margin-bottom: 16px;"></p>
+            <div class="form-group">
+                <label>Contato favorito</label>
+                <select id="contactSelect" style="cursor: pointer;">
+                    <option value="">-- Selecione --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Ou digite o número (apenas DDD + celular)</label>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span style="background: var(--primary-light); padding: 8px 12px; border-radius: 40px; font-weight: bold;">+55</span>
+                    <input type="tel" id="dddInput" placeholder="DDD" value="81" maxlength="2" style="width: 70px; text-align: center;">
+                    <input type="tel" id="phoneNumberInput" placeholder="Número do celular" style="flex: 1;">
+                </div>
+                <small style="color: var(--text-gray);">Exemplo: 987654321</small>
+            </div>
+            <button id="sendWhatsappBtn" class="btn-save" style="cursor: pointer; width: 100%;">📤 Enviar mensagem</button>
         </div>
     </div>
 </div>
@@ -900,6 +1005,7 @@
             document.getElementById('syncStatus').textContent = `✅ ${items.length} itens carregados`;
             document.getElementById('syncStatus').classList.add('synced');
             refreshAllUI();
+            updatePredictionCard(); // IA
         } catch(e) { console.error(e); }
         finally { hideLoading(); }
     }
@@ -936,7 +1042,7 @@
     }
     function editMeta() { document.getElementById('metaModal').style.display = 'flex'; document.getElementById('metaAmountInput').value = userSettings.meta; }
     function closeMetaModal() { document.getElementById('metaModal').style.display = 'none'; }
-    function saveMeta() { let v = parseFloat(document.getElementById('metaAmountInput').value); if(!isNaN(v) && v>=0) { userSettings.meta = v; if(currentUser) saveToCloud(); updateMetaUI(); closeMetaModal(); } }
+    function saveMeta() { let v = parseFloat(document.getElementById('metaAmountInput').value); if(!isNaN(v) && v>=0) { userSettings.meta = v; if(currentUser) saveToCloud(); updateMetaUI(); closeMetaModal(); updatePredictionCard(); } }
 
     // ==================== DADOS FINANCEIROS ====================
     function getFinancialItemsForDate(d) { let key = formatDateKey(d); return items.filter(i => i.date === key && (i.type === 'income' || i.type === 'expense')); }
@@ -964,9 +1070,9 @@
         for(let i=0;i<startDay;i++){ let e = document.createElement('div'); e.className = 'month-day'; e.style.background = 'transparent'; e.style.cursor = 'default'; grid.appendChild(e); }
         for(let day=1;day<=totalDays;day++){ let d = new Date(year,month,day); let dayItems = getItemsForDate(d); let inc=0, exp=0, allPaid=true; dayItems.forEach(i=>{ if(i.type==='income') inc+=i.amount; if(i.type==='expense') exp+=i.amount; if(i.status !== 'paid') allPaid=false; }); let isToday = d.toDateString() === today.toDateString(); let indicatorClass = ''; if(inc>0 && exp>0) indicatorClass = 'has-both'; else if(inc>0) indicatorClass = 'has-income'; else if(exp>0) indicatorClass = 'has-expense'; let hasApp = dayItems.some(i=>i.type==='appointment'); let hasNote = dayItems.some(i=>i.type==='note'); if(hasApp) indicatorClass += ' has-appointment'; if(hasNote) indicatorClass += ' has-note'; let dayDiv = document.createElement('div'); dayDiv.className = `month-day ${isToday?'today':''} ${indicatorClass}`; let indicators = ''; if(inc>0) indicators += `<span class="indicator-up ${allPaid?'paid':''}">↑${inc.toFixed(0)}</span>`; if(exp>0) indicators += `<span class="indicator-down ${allPaid?'paid':''}">↓${exp.toFixed(0)}</span>`; if(hasApp) indicators += `📅`; if(hasNote) indicators += `📝`; dayDiv.innerHTML = `<div class="day-number">${day}</div>${indicators?`<div class="day-indicators">${indicators}</div>`:''}`; dayDiv.onclick = () => showDayModal(d); grid.appendChild(dayDiv); }
     }
-    function refreshAllUI() { renderWeekCalendar(); renderMonthCalendar(); updateBalances(); updateDescriptionDatalist(); }
+    function refreshAllUI() { renderWeekCalendar(); renderMonthCalendar(); updateBalances(); updateDescriptionDatalist(); updatePredictionCard(); }
 
-    // ==================== MODAL DO DIA (EXCLUSÃO MÚLTIPLA) ====================
+    // ==================== MODAL DO DIA ====================
     function showDayModal(date) {
         currentDayModalDate = date;
         document.getElementById('dayModalTitle').innerHTML = formatDateDisplay(date);
@@ -1029,21 +1135,48 @@
     }
     function addContact() { let name = document.getElementById('contactName').value.trim(), phone = document.getElementById('contactPhone').value.trim(); if(!name || !phone) { alert('Preencha nome e número'); return; } if(!userSettings.contacts) userSettings.contacts = []; userSettings.contacts.push({name, phone}); if(currentUser) saveToCloud(); renderContacts(); document.getElementById('contactName').value = ''; document.getElementById('contactPhone').value = ''; }
 
-    // ==================== WHATSAPP ====================
-    function sendWhatsAppMessageDirect(phone, transaction = null) {
-        if(!transaction && lastSavedTransaction) transaction = lastSavedTransaction;
-        if(!transaction) { alert('Nada para enviar'); return; }
-        let tipo = transaction.type === 'expense' ? '🔴 DESPESA' : '🟢 RECEITA';
-        let msg = `💰 *${tipo}*\n📝 ${transaction.title}\n💵 R$ ${transaction.amount.toFixed(2)}\n📅 Data: ${transaction.date}\n⏳ Status: ${transaction.status === 'paid' ? 'Pago/Recebido' : 'Pendente'}`;
-        window.open(`https://wa.me/${phone.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
+    // ==================== WHATSAPP CORRIGIDO ====================
+    function sendWhatsAppMessageDirect(phoneNumber, transaction) {
+        if (!transaction && lastSavedTransaction) transaction = lastSavedTransaction;
+        if (!transaction) { alert("Nada para enviar."); return; }
+        let raw = phoneNumber.toString().replace(/\D/g, '');
+        if (!raw.startsWith('55')) raw = '55' + raw;
+        const tipo = transaction.type === 'expense' ? '🔴 DESPESA' : '🟢 RECEITA';
+        const msg = `💰 *${tipo}*\n📝 ${transaction.title}\n💵 R$ ${transaction.amount.toFixed(2)}\n📅 Data: ${transaction.date}\n⏳ Status: ${transaction.status === 'paid' ? 'Pago/Recebido' : 'Pendente'}`;
+        window.open(`https://wa.me/${raw}?text=${encodeURIComponent(msg)}`, '_blank');
     }
-    function openWhatsAppModal(transaction) { lastSavedTransaction = transaction; document.getElementById('whatsappMessagePreview').innerHTML = `<strong>Pré-visualização:</strong><br>${transaction.type==='expense'?'🔴 Despesa':'🟢 Receita'} ${transaction.title} - R$ ${transaction.amount.toFixed(2)} (${transaction.date})`; document.getElementById('contactSelect').value = ''; document.getElementById('manualPhone').value = ''; document.getElementById('whatsappModal').style.display = 'flex'; }
-    function sendFromModal() { let phone = document.getElementById('contactSelect').value || document.getElementById('manualPhone').value; if(!phone) { alert('Selecione ou digite um número'); return; } sendWhatsAppMessageDirect(phone, lastSavedTransaction); document.getElementById('whatsappModal').style.display = 'none'; lastSavedTransaction = null; }
+    function openWhatsAppModal(transaction) {
+        lastSavedTransaction = transaction;
+        const preview = document.getElementById('whatsappMessagePreview');
+        if(preview) preview.innerHTML = `<strong>📄 Transação:</strong> ${transaction.type === 'expense' ? '🔴 Despesa' : '🟢 Receita'}<br>${transaction.title}<br>R$ ${transaction.amount.toFixed(2)}<br>${transaction.date}`;
+        document.getElementById('contactSelect').value = '';
+        document.getElementById('dddInput').value = '81';
+        document.getElementById('phoneNumberInput').value = '';
+        const modal = document.getElementById('whatsappModal');
+        modal.style.display = 'flex';
+        modal.style.zIndex = '10000';
+        setTimeout(() => document.getElementById('dddInput').focus(), 50);
+    }
+    function sendFromModal() {
+        let phone = '';
+        const selectedContact = document.getElementById('contactSelect').value;
+        if (selectedContact) phone = selectedContact;
+        else {
+            const ddd = document.getElementById('dddInput').value.trim();
+            const numero = document.getElementById('phoneNumberInput').value.trim();
+            if (!ddd || !numero) { alert('Preencha DDD e número'); return; }
+            phone = `55${ddd}${numero.replace(/\D/g, '')}`;
+        }
+        if (phone.length < 12) { alert('Número inválido'); return; }
+        sendWhatsAppMessageDirect(phone, lastSavedTransaction);
+        document.getElementById('whatsappModal').style.display = 'none';
+        lastSavedTransaction = null;
+    }
 
-    // ==================== MAPA COM GPS (CENTRALIZA NA LOCALIZAÇÃO ATUAL) ====================
+    // ==================== MAPA ====================
     function initMapWithGPS() {
         if(map) map.remove();
-        let defaultLat = -7.933, defaultLng = -34.873; // Paulista-PE
+        let defaultLat = -7.933, defaultLng = -34.873;
         document.getElementById('mapModal').style.display = 'flex';
         setTimeout(() => {
             if(map) map.remove();
@@ -1084,7 +1217,7 @@
     function useLocationFromMap() { if(selectedAddress) document.getElementById('appointmentLocation').value = selectedAddress; document.getElementById('mapModal').style.display = 'none'; }
     function getCurrentLocationGPS() { if(navigator.geolocation) { navigator.geolocation.getCurrentPosition(pos => { let {latitude, longitude} = pos.coords; map.setView([latitude, longitude], 16); if(currentMarker) map.removeLayer(currentMarker); currentMarker = L.marker([latitude, longitude]).addTo(map); reverseGeocodeNow(latitude, longitude); }, err => alert('Não foi possível obter localização')); } else alert('Geolocalização não suportada'); async function reverseGeocodeNow(lat,lng){ let res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=pt-BR`); let data = await res.json(); selectedAddress = data.display_name || `${lat}, ${lng}`; document.getElementById('addressSearchInput').value = selectedAddress; } }
 
-    // ==================== TRANSAÇÕES (CRUD) ====================
+    // ==================== TRANSAÇÕES ====================
     function handleFinancialSubmit(e) {
         e.preventDefault();
         let dateInput = document.getElementById('transactionDate');
@@ -1135,6 +1268,147 @@
     function closeInsightsModal() { document.getElementById('insightsModal').style.display = 'none'; }
     function prevMonth() { currentMonth.setMonth(currentMonth.getMonth()-1); renderMonthCalendar(); }
     function nextMonth() { currentMonth.setMonth(currentMonth.getMonth()+1); renderMonthCalendar(); }
+
+    // ==================== IA LOCAL - PREVISÃO DE CICLOS ====================
+    class FinancialPredictor {
+        constructor(transactions, metaMensal = 0) {
+            this.transactions = transactions.filter(t => t.type === 'expense' && t.amount > 0);
+            this.metaMensal = metaMensal;
+            this.dailyBudget = metaMensal > 0 ? metaMensal / 30 : 100;
+        }
+        getExpensesLastDays(days = 60) {
+            const today = new Date();
+            const cutoff = new Date(); cutoff.setDate(today.getDate() - days);
+            return this.transactions.filter(t => {
+                const tDate = new Date(t.date);
+                return tDate >= cutoff && tDate <= today;
+            });
+        }
+        getPatternByWeekday() {
+            const weekdaySum = [0,0,0,0,0,0,0];
+            const weekdayCount = [0,0,0,0,0,0,0];
+            this.getExpensesLastDays(90).forEach(t => {
+                const d = new Date(t.date);
+                const wd = d.getDay();
+                weekdaySum[wd] += t.amount;
+                weekdayCount[wd] += 1;
+            });
+            return weekdaySum.map((sum, i) => weekdayCount[i] ? sum / weekdayCount[i] : 0);
+        }
+        predictNext7Days() {
+            const last30 = this.getExpensesLastDays(30);
+            if (last30.length < 7) return { prediction: null, message: "Dados insuficientes (menos de 7 dias de despesas)" };
+            const last7days = [];
+            for (let i = 1; i <= 7; i++) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                const dailyExp = last30.filter(t => t.date === d.toISOString().slice(0,10)).reduce((s, t) => s + t.amount, 0);
+                last7days.push(dailyExp);
+            }
+            let weightedSum = 0, weightTotal = 0;
+            for (let i = 0; i < last7days.length; i++) {
+                const weight = i + 1;
+                weightedSum += last7days[i] * weight;
+                weightTotal += weight;
+            }
+            const baseline = weightedSum / weightTotal;
+            const weekdayAvg = this.getPatternByWeekday();
+            const today = new Date();
+            let dailyPredictions = [];
+            let totalPredicted = 0;
+            for (let i = 1; i <= 7; i++) {
+                const futureDate = new Date(); futureDate.setDate(today.getDate() + i);
+                const wd = futureDate.getDay();
+                const factor = weekdayAvg[wd] > 0 ? weekdayAvg[wd] / (weekdayAvg.reduce((a,b)=>a+b,0)/7) : 1;
+                let predicted = baseline * factor;
+                predicted = Math.max(0, Math.min(predicted, this.dailyBudget * 1.5));
+                dailyPredictions.push(predicted);
+                totalPredicted += predicted;
+            }
+            return { prediction: totalPredicted, dailyBreakdown: dailyPredictions, baselineAvg: baseline, message: `Projeção para 7 dias: R$ ${totalPredicted.toFixed(2)}` };
+        }
+        getAlert() {
+            const pred = this.predictNext7Days();
+            if (!pred.prediction) return null;
+            const weeklyBudget = this.dailyBudget * 7;
+            const percent = (pred.prediction / weeklyBudget) * 100;
+            if (percent >= 80) return { level: percent >= 100 ? 'critical' : 'warning', message: `⚠️ Previsão de gastos (R$ ${pred.prediction.toFixed(2)}) ocupa ${percent.toFixed(0)}% do orçamento semanal (R$ ${weeklyBudget.toFixed(2)}).`, suggestion: `Sugerimos reduzir despesas não essenciais.` };
+            return { level: 'ok', message: `✅ Dentro do esperado. Previsão: R$ ${pred.prediction.toFixed(2)}` };
+        }
+        suggestDailyLimit() {
+            const last30 = this.getExpensesLastDays(30);
+            if (last30.length === 0) return this.dailyBudget;
+            const avgDaily = last30.reduce((s,t) => s + t.amount, 0) / 30;
+            return Math.max(10, avgDaily * 0.9);
+        }
+    }
+    async function updatePredictionCard() {
+        const container = document.getElementById('predictionContent');
+        if (!container) return;
+        const meta = userSettings.meta || 0;
+        const predictor = new FinancialPredictor(items, meta);
+        const alertData = predictor.getAlert();
+        const predResult = predictor.predictNext7Days();
+        let html = '';
+        if (!predResult.prediction) {
+            html = `<div style="text-align:center; color: var(--text-gray);">🔍 ${predResult.message || 'Insira mais despesas nos últimos 30 dias.'}</div>`;
+        } else {
+            const alertClass = alertData.level === 'ok' ? 'ok' : (alertData.level === 'critical' ? 'critical' : 'warning');
+            html = `<div class="prediction-alert ${alertClass}">${alertData.message}<br><small>${alertData.suggestion || ''}</small></div>`;
+            html += `<div><strong>📈 Previsão diária (próximos 7 dias):</strong></div><div class="prediction-days">`;
+            const today = new Date();
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(today); d.setDate(today.getDate() + i + 1);
+                html += `<div class="prediction-day-item"><strong>${d.toLocaleDateString('pt-BR', {weekday:'short'})}</strong><br>R$ ${predResult.dailyBreakdown[i].toFixed(2)}</div>`;
+            }
+            html += `</div><div style="margin-top:8px; font-size:0.7rem;">🎯 Orçamento semanal: R$ ${(predictor.dailyBudget * 7).toFixed(2)}</div>`;
+        }
+        container.innerHTML = html;
+        const applyBtn = document.getElementById('applyAiSuggestionBtn');
+        const suggestedLimit = predictor.suggestDailyLimit();
+        if (applyBtn) {
+            applyBtn.onclick = () => {
+                const newMeta = suggestedLimit * 30;
+                if (confirm(`Aplicar sugestão de economia: limite diário de R$ ${suggestedLimit.toFixed(2)} (meta mensal R$ ${newMeta.toFixed(2)})?`)) {
+                    userSettings.meta = newMeta;
+                    if (currentUser) saveToCloud();
+                    updateMetaUI();
+                    updatePredictionCard();
+                    alert('Meta ajustada com base na IA!');
+                }
+            };
+        }
+    }
+
+    // ==================== GESTOS E ATALHOS ====================
+    // Deslizar para excluir (simulado com toque longo + arrasto em dispositivos móveis)
+    let touchStartX = null;
+    document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+    document.addEventListener('touchend', (e) => {
+        if (!touchStartX) return;
+        const diff = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(diff) > 80) {
+            // Se o modal do dia estiver aberto, tenta excluir o primeiro item (simplificado)
+            if (document.getElementById('dayModal').style.display === 'flex') {
+                const checkboxes = document.querySelectorAll('#dayModalContent .day-item-checkbox');
+                if (checkboxes.length > 0) {
+                    checkboxes[0].click();
+                    deleteSelectedItems();
+                }
+            }
+        }
+        touchStartX = null;
+    });
+    // Atalhos de teclado: 'i' para receita, 'e' para despesa, 'r' para relatório
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        switch(e.key.toLowerCase()) {
+            case 'i': openNewTransaction(new Date(), 'income'); break;
+            case 'e': openNewTransaction(new Date(), 'expense'); break;
+            case 'r': openFullReport(); break;
+            case 'm': document.getElementById('metaModal').style.display = 'flex'; break;
+            default: break;
+        }
+    });
 
     // ==================== AUTENTICAÇÃO ====================
     async function login() { let email = document.getElementById('loginEmail').value, pass = document.getElementById('loginPassword').value; if(!email||!pass){alert('Preencha e-mail e senha');return;} showLoading(); try{ await auth.signInWithEmailAndPassword(email,pass); alert('✅ Login realizado!'); document.getElementById('loginEmail').value = ''; document.getElementById('loginPassword').value = ''; } catch(e){ alert('❌ '+e.message); } finally{ hideLoading(); } }
